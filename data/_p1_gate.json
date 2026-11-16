@@ -1,0 +1,32 @@
+[
+ {
+  "name": "南侧北幅",
+  "segments": 13,
+  "median": 0.23,
+  "max": 5.88
+ },
+ {
+  "name": "南侧南幅",
+  "segments": 13,
+  "median": 0.62,
+  "max": 5.73
+ },
+ {
+  "name": "北侧行车道",
+  "segments": 10,
+  "median": 0.62,
+  "max": 5.88
+ },
+ {
+  "name": "西侧西幅",
+  "segments": 7,
+  "median": 0.62,
+  "max": 4.38
+ },
+ {
+  "name": "西侧东幅",
+  "segments": 7,
+  "median": 0.88,
+  "max": 2.62
+ }
+]

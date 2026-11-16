@@ -1,0 +1,38 @@
+{
+ "tennis_N": {
+  "kind": "tennis",
+  "center": [
+   -137.8,
+   48.1
+  ],
+  "long_axis_deg_from_E": 110.0,
+  "mean_line_dist_m": 0.094
+ },
+ "tennis_S": {
+  "kind": "tennis",
+  "center": [
+   -127.5,
+   19.5
+  ],
+  "long_axis_deg_from_E": 110.3,
+  "mean_line_dist_m": 0.146
+ },
+ "basket_W": {
+  "kind": "basket",
+  "center": [
+   -269.5,
+   21.2
+  ],
+  "long_axis_deg_from_E": 110.1,
+  "mean_line_dist_m": 0.044
+ },
+ "basket_NE": {
+  "kind": "basket",
+  "center": [
+   171.6,
+   46.1
+  ],
+  "long_axis_deg_from_E": 101.5,
+  "mean_line_dist_m": 0.414
+ }
+}
