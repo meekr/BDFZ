@@ -1,0 +1,52 @@
+{
+  "scale": {
+    "px_per_m_02_hires": 7.83351,
+    "px_per_m_03_hires": 15.66545,
+    "px_per_m_04_hires": 33.9962,
+    "m_per_px_02_hires": 0.12766,
+    "px_per_m_02_2000": 3.15804,
+    "m_per_px_02_2000": 0.31665,
+    "chain": [
+      "04 自带 50 m 比例尺 → 33.996 px/m",
+      "04→02 剪影配准缩放 0.4608",
+      "02 高清图幅宽 4961 ↔ 04 9921",
+      "02 = 7.8335 px/m；03 = 02 × 2 = 15.6655 px/m"
+    ]
+  },
+  "buildings": {
+    "sports": {
+      "outer_area_m2": 11297.7,
+      "length_m": 160.21,
+      "width_m": 149.2,
+      "long_axis_deg": 70.0,
+      "vertices": 26,
+      "holes": 0,
+      "largest_hole_m2": 0
+    },
+    "cloud": {
+      "outer_area_m2": 16137.9,
+      "length_m": 146.44,
+      "width_m": 143.39,
+      "long_axis_deg": 55.02,
+      "vertices": 36,
+      "holes": 1,
+      "largest_hole_m2": 5605.2
+    },
+    "dorm": {
+      "outer_area_m2": 17404.1,
+      "length_m": 249.42,
+      "width_m": 123.02,
+      "long_axis_deg": 59.87,
+      "vertices": 33,
+      "holes": 7,
+      "largest_hole_m2": 84.6
+    }
+  },
+  "track": {
+    "sheet": "03",
+    "long_axis_angle_img_deg": 70.0,
+    "outer_span_px": 2972.0,
+    "outer_span_m": 189.72,
+    "note": "03 图上跑道长边平行线（70°）的法向间距，含跑道外侧缓冲区，不是 400 m 标准跑道外缘的理论 177 m。"
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "source": "03 总平面线稿（scripts/trace_courts.py）",
+  "px_per_m": 15.6654,
+  "note": "室外场铺在地面；落在体育中心轮廓内的记为室内场，抬到 +12.00 层，剖切时可见。旋转角为图面矩形长轴相对 x 轴的角度（顺时针为正）。",
+  "count": 8,
+  "courts": [
+    {
+      "id": "small-1",
+      "kind": "outdoor-small",
+      "label": "小球场 1",
+      "center": [
+        -100.9,
+        -129.0
+      ],
+      "size": [
+        17.5,
+        10.6
+      ],
+      "rot_deg": 54.7,
+      "level_m": 0.16,
+      "source": "03 图 NE 斜向排列"
+    },
+    {
+      "id": "small-2",
+      "kind": "outdoor-small",
+      "label": "小球场 2",
+      "center": [
+        -93.7,
+        -109.3
+      ],
+      "size": [
+        17.5,
+        10.6
+      ],
+      "rot_deg": 54.7,
+      "level_m": 0.16,
+      "source": "03 图 NE 斜向排列"
+    },
+    {
+      "id": "small-3",
+      "kind": "outdoor-small",
+      "label": "小球场 3",
+      "center": [
+        -86.5,
+        -89.6
+      ],
+      "size": [
+        17.5,
+        10.6
+      ],
+      "rot_deg": 55.0,
+      "level_m": 0.16,
+      "source": "03 图 NE 斜向排列"
+    },
+    {
+      "id": "small-4",
+      "kind": "outdoor-small",
+      "label": "小球场 4",
+      "center": [
+        -79.4,
+        -69.9
+      ],
+      "size": [
+        17.5,
+        10.7
+      ],
+      "rot_deg": 55.0,
+      "level_m": 0.16,
+      "source": "03 图 NE 斜向排列"
+    },
+    {
+      "id": "small-5",
+      "kind": "outdoor-small",
+      "label": "小球场 5",
+      "center": [
+        -72.2,
+        -50.1
+      ],
+      "size": [
+        17.5,
+        10.7
+      ],
+      "rot_deg": 55.0,
+      "level_m": 0.16,
+      "source": "03 图 NE 斜向排列"
+    },
+    {
+      "id": "court-1",
+      "kind": "outdoor-court",
+      "label": "室外球场 1",
+      "center": [
+        -213.8,
+        52.6
+      ],
+      "size": [
+        30.6,
+        18.1
+      ],
+      "rot_deg": 20.1,
+      "level_m": 0.16,
+      "source": "03 图"
+    },
+    {
+      "id": "court-2",
+      "kind": "outdoor-court",
+      "label": "室外球场 2",
+      "center": [
+        -211.6,
+        -75.3
+      ],
+      "size": [
+        31.9,
+        18.8
+      ],
+      "rot_deg": 19.9,
+      "level_m": 0.16,
+      "source": "03 图"
+    },
+    {
+      "id": "court-3",
+      "kind": "outdoor-court",
+      "label": "室外球场 3",
+      "center": [
+        -202.7,
+        83.4
+      ],
+      "size": [
+        30.6,
+        18.1
+      ],
+      "rot_deg": 20.1,
+      "level_m": 0.16,
+      "source": "03 图"
+    }
+  ]
+}

@@ -1,0 +1,375 @@
+{
+  "generated": "2026-11-14",
+  "window_world": {
+    "x0": -316.65,
+    "x1": 316.65,
+    "z0": -223.91,
+    "z1": 223.91
+  },
+  "px_per_m_in_render": 3.158,
+  "targets": {
+    "median_le_m": 0.5,
+    "max_le_m": 1.5,
+    "iou_ge": 0.97
+  },
+  "buildings": {
+    "cloud": {
+      "iou": 0.9152,
+      "median_m": 0.0,
+      "p95_m": 0.0,
+      "max_m": 26.878,
+      "excess_m2": 969.3,
+      "deficit_m2": 9.0
+    },
+    "dorm": {
+      "iou": 0.9659,
+      "median_m": 0.0,
+      "p95_m": 0.0,
+      "max_m": 3.799,
+      "excess_m2": 591.7,
+      "deficit_m2": 6.4
+    },
+    "sports": {
+      "iou": 0.8949,
+      "median_m": 0.0,
+      "p95_m": 0.317,
+      "max_m": 26.751,
+      "excess_m2": 1095.3,
+      "deficit_m2": 213.1
+    },
+    "all": {
+      "iou": 0.9322,
+      "median_m": 0.0,
+      "p95_m": 0.0,
+      "max_m": 26.878,
+      "excess_m2": 2581.5,
+      "deficit_m2": 228.5
+    }
+  },
+  "interiors": {
+    "pool": {
+      "hall_m": [
+        51.7,
+        37.8
+      ],
+      "venue_m": [
+        50.0,
+        25.0
+      ],
+      "margin_m": [
+        1.7,
+        12.8
+      ],
+      "center": [
+        -197.0,
+        -11.9
+      ],
+      "rot_deg": 20.0,
+      "fits": true
+    },
+    "gym": {
+      "hall_m": [
+        47.6,
+        21.1
+      ],
+      "venue_m": [
+        28.0,
+        15.0
+      ],
+      "margin_m": [
+        19.6,
+        6.1
+      ],
+      "center": [
+        -177.9,
+        53.6
+      ],
+      "rot_deg": 20.0,
+      "fits": true
+    },
+    "theater": {
+      "hall_m": [
+        30.6,
+        22.5
+      ],
+      "venue_m": [
+        26.6,
+        18.5
+      ],
+      "margin_m": [
+        4.0,
+        4.0
+      ],
+      "center": [
+        -100.6,
+        64.2
+      ],
+      "rot_deg": 35.0,
+      "fits": true
+    }
+  },
+  "section": {
+    "px_per_m": 33.936,
+    "y0_px": 3118.0,
+    "drawn_elevations_m": [
+      23.4,
+      23.22,
+      22.42,
+      18.74,
+      17.92,
+      16.27,
+      15.94,
+      14.23,
+      13.41,
+      12.49,
+      12.23,
+      11.43,
+      9.72,
+      7.99,
+      7.72,
+      6.98,
+      4.92,
+      4.51,
+      4.13,
+      3.92,
+      -0.09,
+      -0.8
+    ],
+    "matched": [
+      {
+        "name": "cloud.south_wing.ground",
+        "target_m": 5.0,
+        "drawn_m": 4.92,
+        "residual_m": 0.08
+      },
+      {
+        "name": "cloud.south_wing.roof",
+        "target_m": 23.5,
+        "drawn_m": 23.4,
+        "residual_m": 0.1
+      },
+      {
+        "name": "cloud.north_wing.ground",
+        "target_m": 0.0,
+        "drawn_m": -0.09,
+        "residual_m": 0.09
+      },
+      {
+        "name": "cloud.north_wing.roof",
+        "target_m": 17.0,
+        "drawn_m": 16.27,
+        "residual_m": 0.73
+      },
+      {
+        "name": "cloud.north_wing.parapet",
+        "target_m": 19.0,
+        "drawn_m": 18.74,
+        "residual_m": 0.26
+      },
+      {
+        "name": "cloud.library.ground",
+        "target_m": 0.0,
+        "drawn_m": -0.09,
+        "residual_m": 0.09
+      },
+      {
+        "name": "cloud.library.roof",
+        "target_m": 5.0,
+        "drawn_m": 4.92,
+        "residual_m": 0.08
+      }
+    ],
+    "median_residual_m": 0.09,
+    "max_residual_m": 0.73,
+    "matched_count": 7,
+    "target_count": 7,
+    "floor_median_m": 0.09,
+    "floor_max_m": 0.09,
+    "roof_median_m": 0.18,
+    "roof_max_m": 0.73
+  },
+  "courts": {
+    "count_expected": 8,
+    "count_drawn": 8,
+    "matched": [
+      {
+        "id": "small-1",
+        "expected": [
+          -100.9,
+          -129.0
+        ],
+        "drawn": [
+          -101.0,
+          -129.2
+        ],
+        "size_expected": [
+          17.5,
+          10.6
+        ],
+        "size_drawn": [
+          17.7,
+          10.8
+        ],
+        "offset_m": 0.22
+      },
+      {
+        "id": "small-2",
+        "expected": [
+          -93.7,
+          -109.3
+        ],
+        "drawn": [
+          -93.8,
+          -109.5
+        ],
+        "size_expected": [
+          17.5,
+          10.6
+        ],
+        "size_drawn": [
+          17.7,
+          10.8
+        ],
+        "offset_m": 0.22
+      },
+      {
+        "id": "small-3",
+        "expected": [
+          -86.5,
+          -89.6
+        ],
+        "drawn": [
+          -86.7,
+          -89.8
+        ],
+        "size_expected": [
+          17.5,
+          10.6
+        ],
+        "size_drawn": [
+          17.7,
+          10.8
+        ],
+        "offset_m": 0.28
+      },
+      {
+        "id": "small-4",
+        "expected": [
+          -79.4,
+          -69.9
+        ],
+        "drawn": [
+          -79.5,
+          -70.1
+        ],
+        "size_expected": [
+          17.5,
+          10.7
+        ],
+        "size_drawn": [
+          17.7,
+          10.9
+        ],
+        "offset_m": 0.22
+      },
+      {
+        "id": "small-5",
+        "expected": [
+          -72.2,
+          -50.1
+        ],
+        "drawn": [
+          -72.3,
+          -50.3
+        ],
+        "size_expected": [
+          17.5,
+          10.7
+        ],
+        "size_drawn": [
+          17.7,
+          10.9
+        ],
+        "offset_m": 0.22
+      },
+      {
+        "id": "court-1",
+        "expected": [
+          -213.8,
+          52.6
+        ],
+        "drawn": [
+          -213.9,
+          52.4
+        ],
+        "size_expected": [
+          30.6,
+          18.1
+        ],
+        "size_drawn": [
+          34.4,
+          21.9
+        ],
+        "offset_m": 0.22
+      },
+      {
+        "id": "court-2",
+        "expected": [
+          -211.6,
+          -75.3
+        ],
+        "drawn": [
+          -211.7,
+          -75.5
+        ],
+        "size_expected": [
+          31.9,
+          18.8
+        ],
+        "size_drawn": [
+          35.7,
+          22.6
+        ],
+        "offset_m": 0.22
+      },
+      {
+        "id": "court-3",
+        "expected": [
+          -202.7,
+          83.4
+        ],
+        "drawn": [
+          -202.8,
+          83.2
+        ],
+        "size_expected": [
+          30.6,
+          18.1
+        ],
+        "size_drawn": [
+          34.4,
+          21.9
+        ],
+        "offset_m": 0.22
+      }
+    ],
+    "median_offset_m": 0.22,
+    "max_offset_m": 0.28,
+    "within_1m": 8
+  },
+  "three_f": {
+    "plate": {
+      "median_m": 0.0,
+      "p95_m": 2.217,
+      "max_m": 4.365,
+      "iou": 0.6086
+    },
+    "courtyard": {
+      "median_m": 1.773,
+      "p95_m": 9.341,
+      "max_m": 14.748,
+      "iou": 0.8046
+    },
+    "note": "04 的楼板是「室内空白并集填洞」，其边界是外墙内表面；模型外环是外表面，因此外环会有一层墙厚的系统偏移（约 0.3–0.5 m）。内院比较不含此项。"
+  }
+}

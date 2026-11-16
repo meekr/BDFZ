@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "updated": "2026-11-14",
+  "source": "05 剖面（research/plans/hires/06_cloud_section.jpg）+ 计划 2.4 / 2.5",
+  "datum": {
+    "world_y_zero": "01 图绝对标高 43.00（学术中心中央庭院标注「43.00 (±0.00)」）",
+    "rule": "模型 y = 下表 elevation_m；所有数值统一到同一基准，05 图自身的 ±0.00 即本表 0.00",
+    "cross_check": [
+      "01 中央庭院「43.00 (±0.00)」→ 本表 0.00（即 y=0 ↔ 绝对 43.00）",
+      "01 南侧低处另有 38.00 的标注，与体育中心南侧入口 37.00 相近，属台地跌级",
+      "01 操场「43.00（括号 6.00）」→ 括号内的 6.00 是相对场地台面的高度，本表取 6.00",
+      "05 北侧主入口 −5.00 与 03 北侧广场 −5.00 一致",
+      "05 南侧台地 +5.00、草地 −3.00 与 03 场地标高梯度一致"
+    ]
+  },
+  "sections": {
+    "05": {
+      "cut": "学术中心南北向（左端南、右端北主入口）",
+      "labels_read_px": {
+        "south_wing_roof": 2306,
+        "south_wing_l4": 2440,
+        "south_wing_l3": 2690,
+        "south_wing_l2": 2890,
+        "north_roof_19": 2470,
+        "north_roof_17": 2560,
+        "north_l3": 2820,
+        "north_l2": 3050,
+        "north_l1": 3300
+      }
+    }
+  },
+  "site": {
+    "south_grass": -3.0,
+    "south_terrace": 5.0,
+    "courtyard_and_library": 0.0,
+    "north_main_entrance": -5.0,
+    "north_plaza": -5.0,
+    "east_side": -2.0,
+    "track_deck": 6.0,
+    "sports_roof_platform": 6.0
+  },
+  "cloud": {
+    "name": "学术中心（翔云）",
+    "south_wing": {
+      "note": "高中部；架空层地面 +5.00，楼面 +10.00/+14.50/+19.00，屋面 +23.50",
+      "ground": 5.0,
+      "floors": [
+        10.0,
+        14.5,
+        19.0
+      ],
+      "roof": 23.5
+    },
+    "north_wing": {
+      "note": "初中书院；楼面 ±0.00/+5.00/+8.00/+12.50，屋面 +17.00，檐口 +19.00",
+      "ground": 0.0,
+      "floors": [
+        5.0,
+        8.0,
+        12.5
+      ],
+      "roof": 17.0,
+      "parapet": 19.0
+    },
+    "library": {
+      "note": "单层，屋面约 +5.00（种植屋面）",
+      "ground": 0.0,
+      "roof": 5.0
+    },
+    "pilotis": {
+      "note": "学术中心底层架空高度（03 与照片：白色 V/N 形斜柱约 8.5 m）",
+      "height_m": 8.5
+    }
+  },
+  "sports_art": {
+    "name": "体育及艺术中心",
+    "west_arm_sports": {
+      "note": "总高 24 m，0 m 与 12 m 两层活动面（01 标 2F）",
+      "floor_1": 0.0,
+      "floor_2": 12.0,
+      "roof": 24.0
+    },
+    "south_arm_art": {
+      "note": "一层通高：黑匣子剧场 → 1000 人剧场 → 舞蹈排练室",
+      "floor": 0.0,
+      "roof": 16.0
+    }
+  },
+  "dorm": {
+    "name": "宿舍综合楼",
+    "note": "01 标 5F；层高按 08–12 单元平面读取，此处为按 5 层均分 21 m 檐高的推定值",
+    "ground": 0.0,
+    "floor_height_m": 3.3,
+    "levels": 5,
+    "roof": 16.5,
+    "parapet": 18.0
+  },
+  "track": {
+    "deck": 6.0,
+    "note": "抬高操场，正下方为地下车库；03 体育中心屋面平台 +6.00"
+  },
+  "tech_center": {
+    "name": "技术中心（成就中心）",
+    "ground": 0.0,
+    "roof": 15.0
+  }
+}
