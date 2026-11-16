@@ -1,0 +1,11 @@
+# 卫星底图仅本地校核，不入库、不分发；用 python3 tools/p0_satellite.py 重新下载
+refs/satellite/
+
+# Blender 自动备份
+*.blend1
+*.blend@
+
+__pycache__/
+.DS_Store
+node_modules/
+web/dist/
