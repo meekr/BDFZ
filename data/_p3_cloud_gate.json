@@ -1,0 +1,31 @@
+{
+ "f1": {
+  "north": 8.0,
+  "north_ref": 8.0,
+  "south": 10.0,
+  "south_ref": 10.0,
+  "err": 0.0
+ },
+ "f2": {
+  "north": 12.5,
+  "north_ref": 12.5,
+  "south": 14.5,
+  "south_ref": 14.5,
+  "err": 0.0
+ },
+ "f3": {
+  "north": 17.0,
+  "north_ref": 17.0,
+  "south": 19.0,
+  "south_ref": 19.0,
+  "err": 0.0
+ },
+ "roof": {
+  "north": 19.0,
+  "north_ref": 19.0,
+  "south": 23.5,
+  "south_ref": 23.5,
+  "err": 0.0
+ },
+ "columns": 130
+}

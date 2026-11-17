@@ -14,6 +14,10 @@ Y_S, Y_N = L['ramp_y']          # 南端、北端过渡线
 
 MATS = {
     'M_Cloud_Roof': (0.62, 0.62, 0.60, 0.8),
+    'M_Cloud_Slab': (0.30, 0.31, 0.33, 0.5),
+    'M_Cloud_Glass': (0.42, 0.52, 0.60, 0.15),
+    'M_Cloud_Core': (0.85, 0.85, 0.83, 0.8),
+    'M_Cloud_Column': (0.90, 0.90, 0.88, 0.7),
     'M_Cloud_Podium': (0.55, 0.54, 0.50, 0.9),
     'M_Cloud_LibraryRoof': (0.45, 0.30, 0.22, 0.8),
 }
@@ -86,29 +90,71 @@ def clip_y(ring, ymax):
     return out
 
 
+P3 = json.load(open(os.path.join(ROOT, 'data', 'bldg_cloud_p3.json')))
+LV = {k: tuple(v) for k, v in P3['levels'].items()}
+SLAB_T = 0.6
+COL_R = 0.45
+
+
+def lv(name):
+    s, n = LV[name]
+    return lambda y: lerp_y(y, s, n)
+
+
+def column_mesh():
+    me = bpy.data.meshes.get('Bldg_Cloud_ColumnUnit')
+    if me is None:
+        bm = bmesh.new()
+        bmesh.ops.create_cone(bm, cap_ends=True, segments=12, radius1=COL_R, radius2=COL_R, depth=1.0)
+        bmesh.ops.translate(bm, vec=(0, 0, 0.5), verts=bm.verts)
+        me = bpy.data.meshes.new('Bldg_Cloud_ColumnUnit'); bm.to_mesh(me); bm.free()
+        me.materials.append(mat('M_Cloud_Column'))
+    return me
+
+
+def columns(c):
+    me = column_mesh()
+    fp, f1 = lv('pilotis'), lv('f1')
+    for i, (x, y, nx, ny, kind) in enumerate(P3['columns']):
+        if kind == 'slant':
+            # 05 北翼剖面：斜柱下端在内、上端在楼板外缘
+            a = Vector((x - 3.5 * nx, y - 3.5 * ny, 0)); b = Vector((x + 1.0 * nx, y + 1.0 * ny, 0))
+        else:
+            a = Vector((x, y, 0)); b = Vector((x, y, 0))
+        a.z = fp(a.y); b.z = f1(b.y) - SLAB_T
+        o = bpy.data.objects.new(f'Bldg_Cloud_Column_{i:03d}', me)
+        d = b - a
+        o.location = a
+        o.rotation_euler = d.to_track_quat('Z', 'Y').to_euler()
+        o.scale = (1, 1, d.length)
+        c.objects.link(o)
+
+
 def main():
     c = coll()
     sh = D['shell'][0]
     court = max(sh['holes'], key=len)
     zb = SITE['campus_base_z']
-    # 平台：外轮廓整体（含庭院），从校园地坪到庭院 ±0.00
+    cuts = (Y_S, Y_N)
     prism('Bldg_Cloud_Podium', sh['outer'], [], zb, 0.0, 'M_Cloud_Podium', c)
-    s, n = L['south'], L['north']
-    # 底层架空：内收核心（柱廊在 P3）
-    for k, p in enumerate(D['ground_core']['parts']):
-        prism(f'Bldg_Cloud_GroundCore{k}', p['outer'], p['holes'],
-              lambda y: lerp_y(y, s[0], n[0]), lambda y: lerp_y(y, s[1], n[1]),
-              'M_Cloud_Podium', c, cuts=(Y_S, Y_N))
-    # 主体：二层楼面起，顶 = 北檐口 19 / 南屋面 23.5
-    prism('Bldg_Cloud_Mass', sh['outer'], sh['holes'],
-          lambda y: lerp_y(y, s[1], n[1]), lambda y: lerp_y(y, L['eave']['south'], L['eave']['north']),
-          'M_Cloud_Roof', c, cuts=(Y_S, Y_N))
-    # 图书馆：庭院南部单层
+    for k, p in enumerate(P3['core']):
+        prism(f'Bldg_Cloud_GroundCore{k}', p['outer'], p['holes'], lv('pilotis'), lambda y: lv('f1')(y) - SLAB_T,
+              'M_Cloud_Core', c, cuts=cuts)
+    fac_top = lambda y: lerp_y(y, LV['roof'][0], LV['f3'][1])
+    for k, p in enumerate(P3['facade']):
+        prism(f'Bldg_Cloud_Facade{k}', p['outer'], p['holes'], lv('f1'), fac_top, 'M_Cloud_Glass', c, cuts=cuts)
+    for name in ('f1', 'f2', 'f3', 'roof'):
+        top = lv(name)
+        for k, p in enumerate(P3['slab']):
+            prism(f'Bldg_Cloud_Slab_{name}', p['outer'], p['holes'], lambda y, t=top: t(y) - SLAB_T, top,
+                  'M_Cloud_Slab', c, cuts=cuts)
+    columns(c)
     lib = clip_y(court, D['library']['clip_y_max'])
     z0, z1 = D['library']['z']
     prism('Bldg_Cloud_Library', lib, [], z0, z1, 'M_Cloud_LibraryRoof', c)
     bpy.ops.wm.save_mainfile()
-    print('cloud objects', [(o.name, len(o.data.vertices), [round(v, 1) for v in o.dimensions]) for o in c.objects])
+    print('cloud objects', len(c.objects))
 
 
 main()
+exec(open(os.path.join(ROOT, 'blender', 'build', 'bldg_annex.py')).read())
