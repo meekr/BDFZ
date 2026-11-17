@@ -20,6 +20,8 @@ MATS = {
     'M_Cloud_Column': (0.90, 0.90, 0.88, 0.7),
     'M_Cloud_Podium': (0.55, 0.54, 0.50, 0.9),
     'M_Cloud_LibraryRoof': (0.45, 0.30, 0.22, 0.8),
+    'M_Cloud_RoofPanel': (0.17, 0.20, 0.24, 0.35),
+    'M_Cloud_RoofRim': (0.72, 0.73, 0.72, 0.5),
 }
 
 
@@ -199,6 +201,48 @@ def facade_walls(c):
     return o
 
 
+def pitched_roof(c):
+    """P6：坡屋面（data/bldg_cloud_roof.json，tools/p6_cloud_roof.py），坐在屋面板顶上、外缘内收一圈浅色檐口。"""
+    from mathutils.kdtree import KDTree
+    R = json.load(open(os.path.join(ROOT, 'data', 'bldg_cloud_roof.json')))
+    edge_pts = []
+    for p in R['edge']:
+        for ring in [p['outer']] + p['holes']:
+            for i in range(len(ring)):
+                a, b = Vector(ring[i]), Vector(ring[(i + 1) % len(ring)])
+                n = max(1, int((b - a).length / 0.25))
+                edge_pts += [a.lerp(b, k / n) for k in range(n)]
+    kd = KDTree(len(edge_pts))
+    for i, q in enumerate(edge_pts):
+        kd.insert((q.x, q.y, 0), i)
+    kd.balance()
+    bm = bmesh.new()
+    edges = []
+    for p in R['panel']:
+        for ring in [p['outer']] + p['holes']:
+            vs = [bm.verts.new((x, y, 0.0)) for x, y in ring]
+            edges += [bm.edges.new((vs[i], vs[(i + 1) % len(vs)])) for i in range(len(vs))]
+    bmesh.ops.triangle_fill(bm, use_beauty=True, use_dissolve=False, edges=edges)
+    for _ in range(12):
+        long = [e for e in bm.edges if e.calc_length() > 3.0]
+        if not long:
+            break
+        bmesh.ops.subdivide_edges(bm, edges=long, cuts=1, use_grid_fill=False)
+        bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    bmesh.ops.beautify_fill(bm, faces=bm.faces[:], edges=bm.edges[:])
+    top = lv('roof')
+    for v in bm.verts:
+        d = kd.find((v.co.x, v.co.y, 0))[2]
+        v.co.z = top(v.co.y) + 0.03 + R['slope'] * min(d, R['cap'])
+    for f in bm.faces:
+        f.normal_update()
+        if f.normal.z < 0:
+            f.normal_flip()
+    me = bpy.data.meshes.new('Bldg_Cloud_RoofSurface'); bm.to_mesh(me); bm.free()
+    me.materials.append(mat('M_Cloud_RoofPanel'))
+    o = bpy.data.objects.new('Bldg_Cloud_RoofSurface', me); c.objects.link(o)
+    return o
+
 def bevel(o, w, seg=3):
     m = o.modifiers.new('Bevel', 'BEVEL'); m.width = w; m.segments = seg
     m.limit_method = 'ANGLE'; m.angle_limit = math.radians(50); m.harden_normals = False
@@ -221,8 +265,9 @@ def main():
         top = lv(name); th = ROOF_FASCIA if name == 'roof' else SLAB_T
         for k, p in enumerate(P3['slab']):
             o = prism(f'Bldg_Cloud_Slab_{name}', p['outer'], p['holes'], lambda y, t=top, th=th: t(y) - th, top,
-                      'M_Cloud_Slab', c, cuts=cuts)
+                      'M_Cloud_RoofRim' if name == 'roof' else 'M_Cloud_Slab', c, cuts=cuts)
             bevel(o, 0.6 if name == 'roof' else 0.2)
+    pitched_roof(c)
     columns(c)
     lib = clip_y(court, D['library']['clip_y_max'])
     z0, z1 = D['library']['z']
