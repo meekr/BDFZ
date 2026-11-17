@@ -21,6 +21,8 @@ def main():
     for o in [o for o in c.objects if o.name.startswith('Bldg_Cloud_Annex')]:
         bpy.data.objects.remove(o, do_unlink=True)
     for k, b in D['blocks'].items():
+        if b.get('sunken'):
+            continue
         bm = bmesh.new()
         f = bm.faces.new([bm.verts.new((x, y, D['base_z'])) for x, y in b['outer']])
         r = bmesh.ops.extrude_face_region(bm, geom=[f])
@@ -30,7 +32,7 @@ def main():
         me.materials.append(mat())
         c.objects.link(bpy.data.objects.new(me.name, me))
     bpy.ops.wm.save_mainfile()
-    print('annex', list(D['blocks']))
+    print('annex', [k for k, b in D['blocks'].items() if not b.get('sunken')])
 
 
 main()

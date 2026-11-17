@@ -7,7 +7,8 @@ import worldgrid as wg, p2_cloud as PC
 RES = 0.15
 EXT = (-110, -160, 80, 20)
 BLOCKS = {   # 名称: (种子点, 顶面 Z, 依据)
-    # 02 上另有东北 (58,-4)、西南 (-75,-102) 两块：卫星为深色下沉区（阴影、树），判为下沉庭院，P5 建
+    'NE_Stair': ((58.0, -4.0), None, '下沉庭院：平台开洞至校园地坪 Z −6（卫星深色阴影区）'),
+    'SW_Strip': ((-75.1, -101.8), None, '下沉庭院/采光井：平台开洞至 Z −6'),
     'S_East': ((44.1, -118.3), 5.0, 'wx_01：金属屋面，约一层，顶与学术中心南翼架空层地面 +5.00 齐'),
     'S_West': ((14.5, -130.8), 5.0, 'wx_01：金属屋面，约一层，顶与学术中心南翼架空层地面 +5.00 齐'),
 }
@@ -25,9 +26,9 @@ def main():
         m = PC.offset(PC.fill_label_circles(m), 0.3)
         parts = PC.polys(m, eps=0.12, min_area=50)
         part = max(parts, key=lambda q: q['area'])
-        out[k] = dict(outer=part['outer'], area=part['area'], top=top, note=note)
+        out[k] = dict(outer=part['outer'], area=part['area'], top=top, note=note, sunken=top is None)
         print(k, len(part['outer']), part['area'])
-    json.dump(dict(name='学术中心周边低层体量', frame='02', base_z=-6.0, blocks=out,
+    json.dump(dict(name='学术中心周边低层体量与下沉庭院', frame='02', base_z=-6.0, blocks=out,
                    note='功能未定（02/03 图例编号与 01 不一一对应）；P6 照片确认'),
               open(os.path.join(wg.ROOT, 'data', 'bldg_annex.json'), 'w'), ensure_ascii=False, indent=1)
     # 复核：对卫星屋面/种植屋面边缘（灰度梯度）

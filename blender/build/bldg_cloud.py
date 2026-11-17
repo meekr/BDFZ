@@ -210,7 +210,9 @@ def main():
     court = max(sh['holes'], key=len)
     zb = SITE['campus_base_z']
     cuts = (Y_S, Y_N)
-    prism('Bldg_Cloud_Podium', sh['outer'], [], zb, 0.0, 'M_Cloud_Podium', c)
+    ANX = json.load(open(os.path.join(ROOT, 'data', 'bldg_annex.json')))
+    sunken = [b['outer'] for b in ANX['blocks'].values() if b.get('sunken')]
+    prism('Bldg_Cloud_Podium', sh['outer'], sunken, zb, 0.0, 'M_Cloud_Podium', c)
     for k, p in enumerate(P3['core']):
         prism(f'Bldg_Cloud_GroundCore{k}', p['outer'], p['holes'], lv('pilotis'), lambda y: lv('f1')(y) - SLAB_T,
               'M_Cloud_Core', c, cuts=cuts)

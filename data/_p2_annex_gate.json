@@ -1,4 +1,12 @@
 {
+ "NE_Stair": {
+  "median": 0.42,
+  "p90": 2.07
+ },
+ "SW_Strip": {
+  "median": 0.42,
+  "p90": 1.83
+ },
  "S_East": {
   "median": 0.6,
   "p90": 1.74
