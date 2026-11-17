@@ -12,7 +12,7 @@ EXT = (-310, -195, -70, -20)
 SEED = (-200, -150)
 LINE_COMP = 0.3
 GROUND = -6.0        # 01：体育中心 ±0.00 = 37.00
-EAVE = 7.0           # 07 剖面按比例：檐口约在 ±0.00 以上 13 m（推定，透视剖面）
+EAVE = 13.0          # P6 wx_35 匹配相机：屋面外沿与 Z 13 投影重合（原按 07 透视剖面推定为 Z 7，偏低 6 m）
 RIDGE_D = 22.0       # 屋脊离外缘距离上限（卫星屋脊线）
 RISE = 4.0           # 屋脊高出檐口（推定）
 
@@ -81,7 +81,7 @@ def main():
     verts, faces = roof_mesh(m, ap)
     data = dict(name='体育及艺术中心', frame='02_sports', fit=st, line_comp_m=LINE_COMP, outer=outer_w,
                 levels=dict(ground=GROUND, floor2=0.0, eave=EAVE, ridge=EAVE + RISE,
-                            note='01：±0.00 = 37.00（Z −6），2F。二层楼面取操场平台 43.00（Z 0）；檐口 Z 7、屋脊 Z 11 按 07 透视剖面比例推定，P6 照片校核'),
+                            note='01：±0.00 = 37.00（Z −6），2F。二层楼面取操场平台 43.00（Z 0）；檐口 Z 13 由 P6 wx_35 匹配相机校正（07 透视剖面推定的 Z 7 偏低），屋脊 = 檐口 + 4 m 仍为推定'),
                 roof=dict(verts=verts, faces=faces, ridge_d=RIDGE_D))
     json.dump(data, open(os.path.join(wg.ROOT, 'data', 'bldg_sports.json'), 'w'), ensure_ascii=False)
     print('fit', st, 'outer pts', len(outer_w), 'roof v/f', len(verts), len(faces))
