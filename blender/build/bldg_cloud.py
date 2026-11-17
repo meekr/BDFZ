@@ -2,7 +2,7 @@
 
 在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/bldg_cloud.py').read())
 """
-import bpy, bmesh, json, os
+import bpy, bmesh, json, os, math
 from mathutils import Vector
 
 ROOT = '/Users/perrylei/repos/BDFZ_V3'
@@ -92,7 +92,7 @@ def clip_y(ring, ymax):
 
 P3 = json.load(open(os.path.join(ROOT, 'data', 'bldg_cloud_p3.json')))
 LV = {k: tuple(v) for k, v in P3['levels'].items()}
-SLAB_T = 0.6
+SLAB_T = 0.8        # wx_10：楼板带约为层高的 1/6
 COL_R = 0.45
 
 
@@ -130,6 +130,80 @@ def columns(c):
         c.objects.link(o)
 
 
+BAY = 1.5            # 窗格宽度（wx_10 计数：约 1.5 m）
+PANEL_CYCLE = (13.5, 4.5)   # 玻璃 / 白色实墙段长度（规则生成，P6 按照片逐段校正）
+ROOF_FASCIA = 2.0
+
+
+def glass_mat():
+    m = bpy.data.materials.get('M_Cloud_GlassGrid')
+    if m is None:
+        m = bpy.data.materials.new('M_Cloud_GlassGrid'); m.use_nodes = True
+        nt = m.node_tree; b = nt.nodes.get('Principled BSDF')
+        tex = nt.nodes.new('ShaderNodeTexImage')
+        tex.image = bpy.data.images.load(os.path.join(ROOT, 'blender', 'textures', 'cloud_glass.png'), check_existing=True)
+        nt.links.new(tex.outputs['Color'], b.inputs['Base Color'])
+        b.inputs['Roughness'].default_value = 0.08; b.inputs['Metallic'].default_value = 0.4
+        m.diffuse_color = (0.30, 0.38, 0.45, 1)
+    return m
+
+
+def facade_walls(c):
+    """每层一圈立面墙：沿玻璃面轮廓，按 PANEL_CYCLE 分玻璃段与白墙段；UV 以 BAY × 层高 平铺。"""
+    storeys = [('f1', 'f2'), ('f2', 'f3'), ('f3', 'roof')]
+    bm = bmesh.new(); uvl = bm.loops.layers.uv.new('UVMap')
+    rings = []
+    for p in P3['facade']:
+        rings += [p['outer']] + p['holes']
+    cyc = sum(PANEL_CYCLE)
+    for ring in rings:
+        pts = [Vector((x, y, 0)) for x, y in ring]
+        # 沿周长细分：每段 ≤ BAY*2，并在玻璃/白墙交界处断开
+        seq = []; s = 0.0
+        for i in range(len(pts)):
+            a, b = pts[i], pts[(i + 1) % len(pts)]
+            L = (b - a).length
+            cuts = {0.0, L}
+            t = cyc * math.ceil(s / cyc)
+            while t < s + L:
+                for off in (0.0, PANEL_CYCLE[0]):
+                    if s < t + off < s + L:
+                        cuts.add(t + off - s)
+                t += cyc
+            n = max(1, int(math.ceil(L / (BAY * 2))))
+            cuts |= {L * k / n for k in range(n)}
+            cs = sorted(cuts)
+            for u0, u1 in zip(cs[:-1], cs[1:]):
+                if u1 - u0 < 1e-3:
+                    continue
+                seq.append((a.lerp(b, u0 / L), a.lerp(b, u1 / L), s + u0, s + u1))
+            s += L
+        for lo, hi in storeys:
+            flo, fhi = lv(lo), lv(hi)
+            for a, b, s0, s1 in seq:
+                za0, zb0 = flo(a.y), flo(b.y); za1, zb1 = fhi(a.y) - SLAB_T, fhi(b.y) - SLAB_T
+                if max(za1 - za0, zb1 - zb0) < 0.3:
+                    continue
+                v = [bm.verts.new((a.x, a.y, za0)), bm.verts.new((b.x, b.y, zb0)),
+                     bm.verts.new((b.x, b.y, zb1)), bm.verts.new((a.x, a.y, za1))]
+                f = bm.faces.new(v)
+                white = ((s0 + s1) / 2) % cyc > PANEL_CYCLE[0]
+                f.material_index = 1 if white else 0
+                h = 4.5
+                for lp, (uu, vv) in zip(f.loops, [(s0, za0), (s1, zb0), (s1, zb1), (s0, za1)]):
+                    lp[uvl].uv = (uu / BAY, (vv - za0) / h if lp.vert in v[:2] else (vv - za0) / h)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.001)
+    me = bpy.data.meshes.new('Bldg_Cloud_Facade'); bm.to_mesh(me); bm.free()
+    me.materials.append(glass_mat()); me.materials.append(mat('M_Cloud_Core'))
+    o = bpy.data.objects.new('Bldg_Cloud_Facade', me); c.objects.link(o)
+    return o
+
+
+def bevel(o, w, seg=3):
+    m = o.modifiers.new('Bevel', 'BEVEL'); m.width = w; m.segments = seg
+    m.limit_method = 'ANGLE'; m.angle_limit = math.radians(50); m.harden_normals = False
+    return m
+
 def main():
     c = coll()
     sh = D['shell'][0]
@@ -140,14 +214,13 @@ def main():
     for k, p in enumerate(P3['core']):
         prism(f'Bldg_Cloud_GroundCore{k}', p['outer'], p['holes'], lv('pilotis'), lambda y: lv('f1')(y) - SLAB_T,
               'M_Cloud_Core', c, cuts=cuts)
-    fac_top = lambda y: lerp_y(y, LV['roof'][0], LV['f3'][1])
-    for k, p in enumerate(P3['facade']):
-        prism(f'Bldg_Cloud_Facade{k}', p['outer'], p['holes'], lv('f1'), fac_top, 'M_Cloud_Glass', c, cuts=cuts)
+    facade_walls(c)
     for name in ('f1', 'f2', 'f3', 'roof'):
-        top = lv(name)
+        top = lv(name); th = ROOF_FASCIA if name == 'roof' else SLAB_T
         for k, p in enumerate(P3['slab']):
-            prism(f'Bldg_Cloud_Slab_{name}', p['outer'], p['holes'], lambda y, t=top: t(y) - SLAB_T, top,
-                  'M_Cloud_Slab', c, cuts=cuts)
+            o = prism(f'Bldg_Cloud_Slab_{name}', p['outer'], p['holes'], lambda y, t=top, th=th: t(y) - th, top,
+                      'M_Cloud_Slab', c, cuts=cuts)
+            bevel(o, 0.6 if name == 'roof' else 0.2)
     columns(c)
     lib = clip_y(court, D['library']['clip_y_max'])
     z0, z1 = D['library']['z']

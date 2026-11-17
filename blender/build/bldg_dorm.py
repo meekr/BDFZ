@@ -49,6 +49,25 @@ def prism(name, outer, holes, z0, z1, material, c, keep=None):
     return o
 
 
+exec(open(os.path.join(ROOT, 'blender', 'build', 'uvtools.py')).read())
+TEX = os.path.join(ROOT, 'blender', 'textures')
+
+
+def facades(c, z0):
+    """外墙：白墙开窗（wx_11）；庭院侧：外廊（wx_33）。层高 3.6 m 与贴图一致。"""
+    holes = D['shell'][0]['holes']
+    win = image_mat('M_Dorm_Window', os.path.join(TEX, 'dorm_window.png'), fallback=(0.85, 0.85, 0.83, 1))
+    gal = image_mat('M_Dorm_Gallery', os.path.join(TEX, 'dorm_gallery.png'), fallback=(0.5, 0.5, 0.5, 1))
+
+    def cls(p, n):
+        q = p + n * 1.0
+        return 2 if any(point_in(h, q.x, q.y) for h in holes) else 1
+    for name in ('Bldg_Dorm_Mass', 'Bldg_Dorm_Link'):
+        o = bpy.data.objects[name]
+        o.data.materials.append(win); o.data.materials.append(gal)
+        wall_uv(o, 3.6, D['levels']['floor_h'], z0, cls)
+
+
 def main():
     c = bpy.data.collections[COLL]
     for o in list(c.objects):
@@ -60,6 +79,7 @@ def main():
     prism('Bldg_Dorm_Base', sh['outer'], [], zb, z0, 'M_Dorm_Base', c)
     prism('Bldg_Dorm_Mass', sh['outer'], sh['holes'], z0, roof + L['parapet'], 'M_Dorm_Roof', c, keep=('x>', LINK_X))
     prism('Bldg_Dorm_Link', sh['outer'], sh['holes'], z0, LINK_TOP, 'M_Dorm_Link', c, keep=('x<', LINK_X))
+    facades(c, z0)
     bpy.ops.wm.save_mainfile()
     print([(o.name, len(o.data.vertices), [round(v, 1) for v in o.dimensions]) for o in c.objects])
 

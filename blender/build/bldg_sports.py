@@ -60,7 +60,12 @@ def main():
     c = bpy.data.collections[COLL]
     for o in list(c.objects):
         bpy.data.objects.remove(o, do_unlink=True)
-    walls(c); roof(c)
+    w = walls(c); roof(c)
+    exec(open(os.path.join(ROOT, 'blender', 'build', 'uvtools.py')).read(), globals())
+    w.data.materials.clear()
+    w.data.materials.append(mat('M_Sports_Roof'))     # 顶盖：补屋面三角网在凹角处的缺口
+    w.data.materials.append(image_mat('M_Cloud_GlassGrid', os.path.join(ROOT, 'blender', 'textures', 'cloud_glass.png'), 0.08, 0.4, (0.30, 0.38, 0.45, 1)))
+    wall_uv(w, 1.5, 4.5, D['levels']['ground'], lambda p, n: 1)
     bpy.ops.wm.save_mainfile()
     print([(o.name, len(o.data.vertices), [round(v, 1) for v in o.dimensions]) for o in c.objects])
 
