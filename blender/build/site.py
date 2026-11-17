@@ -113,7 +113,8 @@ def build_track(c):
     slab('Site_Track_Infield', place(inner, cx, cy, ang), z + 0.10, 0, 'M_Turf', c)
     # 抬高台面外沿（推定 3 m 宽缓冲带）
     o3, _ = stadium_ring(r_out, r_out + 3.0, straight)
-    slab('Site_Track_Deck', place(o3, cx, cy, ang), z + 0.06, 1.0, 'M_Paving', c)
+    _, i3 = stadium_ring(r_out, r_out, straight)
+    ring_mesh('Site_Track_Deck', place(o3, cx, cy, ang), place(i3, cx, cy, ang), z + 0.06, 'M_Paving', c)
 
 
 def build_courts(c):
