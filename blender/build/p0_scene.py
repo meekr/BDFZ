@@ -123,4 +123,25 @@ def main():
     print('ok', [o.name for o in rc.objects])
 
 
-main()
+
+def refresh_refs():
+    """只重建参考平面（frames.json 更新后用），不动其它集合。"""
+    rc = bpy.data.collections['REF_Drawings']
+    for o in list(rc.objects):
+        m = o.data.materials[0] if o.data.materials else None
+        bpy.data.objects.remove(o, do_unlink=True)
+        if m and m.users == 0:
+            bpy.data.materials.remove(m)
+    for name, key, z, op in REF_ITEMS:
+        ob = ref_plane(name, key, z, op, rc)
+        ob.hide_render = True
+        ob.hide_set(key != '02')
+    bpy.ops.wm.save_mainfile()
+    print('refs refreshed', [o.name for o in rc.objects])
+
+
+# exec 前设 REFS_ONLY = True 则只刷新参考平面
+if globals().get('REFS_ONLY'):
+    refresh_refs()
+else:
+    main()
