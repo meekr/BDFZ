@@ -1,0 +1,27 @@
+{
+ "aerial": {
+  "median_pct": 0.0,
+  "p90_pct": 0.125,
+  "matched_frac": 1.0
+ },
+ "courtyard": {
+  "median_pct": 0.062,
+  "p90_pct": 0.787,
+  "matched_frac": 0.92
+ },
+ "north_entrance": {
+  "median_pct": 0.2,
+  "p90_pct": 1.0,
+  "matched_frac": 0.98
+ },
+ "dorm_courts": {
+  "median_pct": 0.0,
+  "p90_pct": 0.137,
+  "matched_frac": 1.0
+ },
+ "sports_art": {
+  "median_pct": 0.0,
+  "p90_pct": 0.25,
+  "matched_frac": 0.99
+ }
+}

@@ -102,15 +102,26 @@ def sky():
     for attr, v in (('sun_elevation', math.radians(40)), ('sun_rotation', math.radians(215)), ('altitude', 30.0)):
         if hasattr(sk, attr):
             setattr(sk, attr, v)
-    bg.inputs['Strength'].default_value = 0.35
+    if hasattr(sk, 'sun_disc'):
+        sk.sun_disc = False          # 太阳由日光灯提供，天空再带日盘会重复计光、整体过曝
+    bg.inputs['Strength'].default_value = 0.25
     nt.links.new(sk.outputs['Color'], bg.inputs['Color']); nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
     sun = bpy.data.objects.get('Sun')
     if sun is None:
         sun = bpy.data.objects.new('Sun', bpy.data.lights.new('Sun', 'SUN')); bpy.data.collections[COLL].objects.link(sun)
-    sun.data.energy = 3.0; sun.data.angle = math.radians(0.6)
+    sun.data.energy = 3.5; sun.data.angle = math.radians(0.6)
     sun.rotation_euler = (math.radians(50), 0, math.radians(215 - 90 + 180))
-    sc.view_settings.exposure = -0.8
-    sc.view_settings.view_transform = 'AgX' if 'AgX' in [i.identifier for i in sc.view_settings.bl_rna.properties['view_transform'].enum_items] else 'Filmic'
+    sc.view_settings.exposure = 0.0
+    # 色彩管理的枚举是动态的，bl_rna 列不出来，直接设置
+    sc.view_settings.view_transform = 'AgX'
+    sc.view_settings.look = 'AgX - Medium High Contrast'
+    far = bpy.data.objects.get('Landscape_FarGround')
+    if far is None:
+        # 场地外延到地平线，避免俯视时露出天空纹理的地平线以下部分（深色）
+        far = box('Landscape_FarGround', -4000, -4000, 4000, 4000, -6.6, -6.4, 'M_FarGround', bpy.data.collections[COLL])
+        m = far.data.materials[0]; m.use_nodes = True
+        m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.20, 0.26, 0.15, 1)
+        m.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 1.0; m.diffuse_color = (0.20, 0.26, 0.15, 1)
 
 
 def box(name, x0, y0, x1, y1, z0, z1, matname, c):
@@ -129,12 +140,11 @@ def box(name, x0, y0, x1, y1, z0, z1, matname, c):
 
 
 def north_entrance(c):
-    """北入口大台阶：y 117（顶，庭院 43.00 = Z 0）到 y 80（底，道路 37.00 = Z −6），12 级；门房两座。"""
-    W0, W1, YT, YB, ZT, ZB, N = -80.0, 10.0, 117.0, 80.0, 0.0, -6.0, 12
-    for i in range(N):
-        z1 = ZT + (ZB - ZT) * i / N
-        y0 = YT + (YB - YT) * i / N; y1 = YT + (YB - YT) * (i + 1) / N
-        box(f'Landscape_NorthStep_{i:02d}', W0, y0, W1, y1, ZB, z1, 'M_Paving', c)
+    """北入口：两座门房（推定高 4.5 m）。台阶广场（site.json，x −80…10，y 80…117）按平面处理：
+    01 在广场以内 (−28, 74) 标 37.00，与外侧道路同为 Z −6，没有可量的高差（P5 曾按 Z 0→−6 建 12 级台阶，
+    顶端对着道路形成 6 m 高墙，与 01 标高矛盾，已撤销）。"""
+    for o in [o for o in c.objects if o.name.startswith(('Landscape_NorthStep', 'Landscape_Gatehouse'))]:
+        bpy.data.objects.remove(o, do_unlink=True)
     box('Landscape_Gatehouse_W', -90, 66, -55, 79, -6, -1.5, 'M_Cloud_Core', c)
     box('Landscape_Gatehouse_E', 0, 66, 32, 79, -6, -1.5, 'M_Cloud_Core', c)
 

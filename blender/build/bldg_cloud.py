@@ -20,7 +20,7 @@ MATS = {
     'M_Cloud_Column': (0.90, 0.90, 0.88, 0.7),
     'M_Cloud_Podium': (0.55, 0.54, 0.50, 0.9),
     'M_Cloud_LibraryRoof': (0.45, 0.30, 0.22, 0.8),
-    'M_Cloud_RoofPanel': (0.17, 0.20, 0.24, 0.35),
+    'M_Cloud_RoofPanel': (0.13, 0.15, 0.19, 0.55),
     'M_Cloud_RoofRim': (0.72, 0.73, 0.72, 0.5),
 }
 

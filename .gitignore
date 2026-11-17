@@ -7,6 +7,7 @@ refs/satellite/
 
 # P6 检查渲染（blender/build/ref_cameras.py 可重建）
 checks/_renders/
+checks/_web/
 
 __pycache__/
 .DS_Store
