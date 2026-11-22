@@ -42,7 +42,7 @@ def main():
              src='02 屋顶平面、08 长轴剖透视；照片 wx_03/04/19/31/35/36 校正'),
     ]
     info = dict(note='坐标：Blender 世界坐标（米，Z 向上，+X 东 +Y 北）；网页按 glTF 转为 (x, z, −y)。',
-                views=load('views.json'), overlays=dict(extent=EXT, z=0.3, items=ov), buildings=bldgs)
+                views=load('views.json'), tour=load('tour_stops.json'), overlays=dict(extent=EXT, z=0.3, items=ov), buildings=bldgs)
     json.dump(info, open(os.path.join(OUT, 'scene.json'), 'w'), ensure_ascii=False, indent=1)
     print('wrote', [o['file'] for o in ov], 'scene.json')
 

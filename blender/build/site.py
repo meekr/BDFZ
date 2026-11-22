@@ -605,6 +605,52 @@ def build_road_markings(c):
     obj('Site_Road_Markings', bm, 'M_LineWhite', c)
 
 
+
+
+def build_nav_ramps(c):
+    """T1：补齐校园各台地间连贯步行台阶与无障碍坡道（data/nav_ramps.json），保证第一人称全园无断崖通行。"""
+    rp_path = os.path.join(ROOT, 'data', 'nav_ramps.json')
+    if not os.path.exists(rp_path):
+        return
+    R = json.load(open(rp_path))
+    bm = bmesh.new()
+    for item in R.get('ramps', []):
+        p0 = Vector(item['p0'])
+        p1 = Vector(item['p1'])
+        w = float(item.get('width', 5.0))
+        d = Vector((p1.x - p0.x, p1.y - p0.y, 0.0))
+        L = d.length
+        if L < 0.5:
+            continue
+        nx, ny = -d.y / L * (w * 0.5), d.x / L * (w * 0.5)
+        n_off = Vector((nx, ny, 0.0))
+        dz = Vector((0.0, 0.0, -0.45))
+        # 主坡道/台阶厚板（顶部平整便于行走，两侧加暗灰低矮护栏）
+        v0 = bm.verts.new(p0 - n_off); v1 = bm.verts.new(p0 + n_off)
+        v2 = bm.verts.new(p1 + n_off); v3 = bm.verts.new(p1 - n_off)
+        b0 = bm.verts.new(p0 - n_off + dz); b1 = bm.verts.new(p0 + n_off + dz)
+        b2 = bm.verts.new(p1 + n_off + dz); b3 = bm.verts.new(p1 - n_off + dz)
+        for q in ((v0, v1, v2, v3), (b3, b2, b1, b0), (v0, b0, b1, v1),
+                  (v1, b1, b2, v2), (v2, b2, b3, v3), (v3, b3, b0, v0)):
+            bm.faces.new(q).material_index = 0
+        # 两侧 1.0 m 金属扶手栏杆
+        for sgn in (-1.0, 1.0):
+            ra = p0 + n_off * sgn
+            rb = p1 + n_off * sgn
+            add_cyl(bm, ra + Vector((0, 0, 0.98)), rb + Vector((0, 0, 0.98)), 0.04, 6, 1)
+            for k in range(5):
+                t = k / 4.0
+                rp = ra.lerp(rb, t)
+                add_cyl(bm, rp, rp + Vector((0, 0, 0.98)), 0.035, 6, 1)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new('Site_NavRamps')
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(mat('M_Paving'))
+    me.materials.append(mat('M_Cloud_Slab'))
+    c.objects.link(bpy.data.objects.new('Site_NavRamps', me))
+
+
 def main():
     c = coll()
     b = S['boundary']['polygon']
@@ -621,6 +667,7 @@ def main():
     build_road_markings(c)
     build_track(c)
     build_courts(c)
+    build_nav_ramps(c)
     bpy.ops.wm.save_mainfile()
     print('site objects', len(c.objects))
 

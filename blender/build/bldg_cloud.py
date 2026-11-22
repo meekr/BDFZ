@@ -291,7 +291,11 @@ def facade_and_galleries(c):
                 v = [bm.verts.new((a.x, a.y, za0)), bm.verts.new((b.x, b.y, zb0)),
                      bm.verts.new((b.x, b.y, zb1)), bm.verts.new((a.x, a.y, za1))]
                 f = bm.faces.new(v)
-                if kind == 'courtyard':
+                is_3f_north = (lo == 'f3' and -33.0 <= (a.x + b.x) * 0.5 <= 37.0 and (a.y + b.y) * 0.5 >= -22.0)
+                if is_3f_north:
+                    f.material_index = 3
+                    uv_bay = BAY
+                elif kind == 'courtyard':
                     f.material_index = 2
                     uv_bay = COURT_BAY
                 elif kind == 'skylight':
@@ -311,6 +315,7 @@ def facade_and_galleries(c):
     me.materials.append(img_mat('M_Cloud_GlassGrid', 'cloud_glass.png', 0.08, 0.4, (0.30, 0.38, 0.45, 1)))
     me.materials.append(mat('M_Cloud_Core'))
     me.materials.append(img_mat('M_Cloud_Courtyard', 'cloud_courtyard.png', 0.55, 0.05, (0.82, 0.82, 0.80, 1)))
+    me.materials.append(bpy.data.materials.get('M_SportsGlass') or mat('M_Cloud_Skylight'))
     c.objects.link(bpy.data.objects.new('Bldg_Cloud_Facade', me))
 
     # 3D 开敞外廊前沿白色圆形廊柱（实例化）+ 连续金属栏杆（wx_15/wx_23/wx_32）
@@ -492,7 +497,23 @@ def courtyard_interior(c, court):
     # 2. 西南图书馆抬高露台（Z=0..4.5 m，暗灰侧壁 + 浅灰铺装顶面）
     LT = CY['library_terrace']
     z0, z1 = LT['z_base'], LT['z_top']
-    prism('Bldg_Cloud_Library', LT['polygon'], [], z0, z1, 'M_Cloud_Slab', c, top_mat='M_Paving')
+    # T3 破壳：图书馆顶部仍保留完整露台屋面板 (Z=4.15..4.5) 供行走与俯视，下方变为通透玻璃幕墙+门洞，支持直接从星形庭院步入图书馆室内！
+    prism('Bldg_Cloud_Library', LT['polygon'], [], z1 - 0.35, z1, 'M_Cloud_Slab', c, top_mat='M_Paving')
+    bm_lw = bmesh.new()
+    lp_pts = LT['polygon']
+    for i in range(len(lp_pts)):
+        a, b = lp_pts[i], lp_pts[(i + 1) % len(lp_pts)]
+        mx, my = (a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5
+        # 北侧大台阶后方与西北入口处留空门洞，其余做半透玻璃围护
+        if i == 4 or (-38.0 <= mx <= -16.0 and -80.0 <= my <= -68.0):
+            continue
+        vs = [bm_lw.verts.new((a[0], a[1], z0)), bm_lw.verts.new((b[0], b[1], z0)),
+              bm_lw.verts.new((b[0], b[1], z1 - 0.35)), bm_lw.verts.new((a[0], a[1], z1 - 0.35))]
+        bm_lw.faces.new(vs)
+    bmesh.ops.recalc_face_normals(bm_lw, faces=bm_lw.faces)
+    me_lw = bpy.data.meshes.new('Bldg_Cloud_LibraryGlass'); bm_lw.to_mesh(me_lw); bm_lw.free()
+    me_lw.materials.append(bpy.data.materials.get('M_SportsGlass') or mat('M_Cloud_Skylight'))
+    c.objects.link(bpy.data.objects.new('Bldg_Cloud_LibraryGlass', me_lw))
     # 露台顶面 3 处路缘草坪岛
     for k, poly in enumerate(LT['lawns']):
         build_curbed_lawn(f'Bldg_Cloud_CourtLawn_{k}', poly, z1 + 0.01, c)
@@ -558,7 +579,19 @@ def courtyard_interior(c, court):
 
     # 5. 西侧艺术馆展厅低层体块（wx_15 左中景）+ 玻璃立面 + 护栏 + 陡草坡
     WG = CY['west_gallery_volume']
-    prism('Bldg_Cloud_ArtGallery', WG['polygon'], [], WG['z_base'], WG['z_top'] - 0.8, 'M_Cloud_Skylight', c, top_mat='M_Paving')
+    # T3 破壳：艺术馆展厅改为中空顶板 + 面向庭院敞开入口，支持自由步入展厅！
+    bm_ag = bmesh.new()
+    wgp = WG['polygon']
+    for i in range(len(wgp)):
+        if i == 1:  # 东向面对庭院中央的入口面留空门洞
+            continue
+        a, b = wgp[i], wgp[(i + 1) % len(wgp)]
+        bm_ag.faces.new([bm_ag.verts.new((a[0], a[1], WG['z_base'])), bm_ag.verts.new((b[0], b[1], WG['z_base'])),
+                         bm_ag.verts.new((b[0], b[1], WG['z_top'] - 0.8)), bm_ag.verts.new((a[0], a[1], WG['z_top'] - 0.8))])
+    bmesh.ops.recalc_face_normals(bm_ag, faces=bm_ag.faces)
+    me_ag = bpy.data.meshes.new('Bldg_Cloud_ArtGallery'); bm_ag.to_mesh(me_ag); bm_ag.free()
+    me_ag.materials.append(bpy.data.materials.get('M_SportsGlass') or mat('M_Cloud_Skylight'))
+    c.objects.link(bpy.data.objects.new('Bldg_Cloud_ArtGallery', me_ag))
     prism('Bldg_Cloud_ArtGallery_Fascia', WG['polygon'], [], WG['z_top'] - 0.8, WG['z_top'], 'M_Cloud_Slab', c, top_mat='M_Paving')
     build_slope_turf('Bldg_Cloud_WestSlope', WG['slope_top'], WG['slope_bot'], WG['z_top'], 0.04, c)
     bm_wr = bmesh.new()

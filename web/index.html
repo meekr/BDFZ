@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>北大附中海口学校 · 三维模型</title>
+    <title>北大附中海口学校 · 三维模型与一人称漫游</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -11,11 +11,21 @@
     <aside id="panel">
       <header>
         <h1>北大附中海口学校</h1>
-        <p class="sub">校园三维模型 · 依据 2024 图纸与实景照片</p>
+        <p class="sub">三维校园 · 鸟瞰浏览 & 一人称内外漫游</p>
       </header>
       <section>
-        <h2>视点</h2>
+        <div class="mode-switch" role="tablist">
+          <button id="btn-mode-orbit" class="on" role="tab">鸟瞰浏览</button>
+          <button id="btn-mode-fps" role="tab">第一人称漫游</button>
+        </div>
+      </section>
+      <section id="sec-orbit-views">
+        <h2>预设视点</h2>
         <div id="views" class="chips"></div>
+      </section>
+      <section id="sec-tour-stops" hidden>
+        <h2>漫游站点（室外 + 6 大室内）</h2>
+        <div id="stops" class="chips"></div>
       </section>
       <section>
         <h2>图层</h2>
@@ -32,6 +42,8 @@
       </section>
       <p id="status">加载模型…</p>
     </aside>
+
+    <!-- 建筑信息卡（鸟瞰模式） -->
     <article id="card" hidden>
       <button id="card-close" aria-label="关闭">×</button>
       <h3 id="card-name"></h3>
@@ -39,6 +51,37 @@
       <ul id="card-facts"></ul>
       <p id="card-src" class="src"></p>
     </article>
+
+    <!-- 第一人称迷你小地图 -->
+    <div id="minimap-wrap" hidden>
+      <div class="mm-head"><span id="mm-floor">校园总图</span><span class="mm-tip">点击彩点跳转</span></div>
+      <canvas id="minimap" width="220" height="148"></canvas>
+    </div>
+
+    <!-- 第一人称底部导览条 -->
+    <div id="tour-bar" hidden>
+      <button id="tour-prev" title="上一站">‹ 上一站</button>
+      <select id="tour-select" aria-label="选择导览站点"></select>
+      <button id="tour-next" title="下一站">下一站 ›</button>
+      <button id="tour-auto" title="自动巡游">▶ 自动导览</button>
+      <button id="tour-photo-btn" title="实景照片对照">📷 实景对照</button>
+      <button id="tour-exit" class="ghost">退出漫游</button>
+      <span class="tour-hint">WASD 移动 · 拖拽转视角 · 单击地面瞬移</span>
+    </div>
+
+    <!-- 实景照片对照弹窗 -->
+    <article id="photo-modal" hidden>
+      <button id="photo-close" aria-label="关闭">×</button>
+      <h3 id="photo-title"></h3>
+      <p id="photo-floor" class="sub"></p>
+      <img id="photo-img" alt="校园实景照片" />
+      <p id="photo-desc"></p>
+      <p id="photo-credit" class="src"></p>
+    </article>
+
+    <!-- 移动端虚拟摇杆 -->
+    <div id="joy-pad" hidden><div id="joy-knob"></div></div>
+
     <div id="stats" hidden></div>
     <script type="module" src="/src/main.js"></script>
   </body>

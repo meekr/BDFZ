@@ -1,0 +1,197 @@
+{
+ "note": "第一人称漫游 12 个导览站点（Blender 世界坐标，eye_z = 地面 + 1.65 m，yaw_deg: 0=+X东, 90=+Y北, 180=-X西, -90=-Y南）",
+ "stops": [
+  {
+   "id": "north_gate",
+   "label": "北门校名石",
+   "zone": "exterior",
+   "floor": "1F (-6.0 m)",
+   "pos": [
+    -16.0,
+    74.0,
+    -5.95
+   ],
+   "yaw": -90,
+   "pitch": 2,
+   "desc": "校园北侧主入口礼仪广场，正面矗立“北京大学附属中学海口学校”天然景石与两座玻璃门房，前方主大台阶拾级直通学术中心。",
+   "photo": "photos/north_stone.webp",
+   "credit": "学校官方实景"
+  },
+  {
+   "id": "star_courtyard",
+   "label": "星形庭院中心",
+   "zone": "exterior",
+   "floor": "庭院 (±0.0 m)",
+   "pos": [
+    -8.0,
+    -47.0,
+    0.04
+   ],
+   "yaw": -105,
+   "pitch": 5,
+   "desc": "“云”学术中心围合而成的标志性星形庭院：环绕三层退进式开敞外廊、三大错落抬高露台与 15 级扇形黑白条纹大台阶。",
+   "photo": "photos/courtyard.webp",
+   "credit": "© 白羽 实景摄影"
+  },
+  {
+   "id": "library",
+   "label": "图书馆（室内）",
+   "zone": "cloud",
+   "floor": "庭院层 (±0.0 m)",
+   "pos": [
+    -22.0,
+    -78.0,
+    0.08
+   ],
+   "yaw": -110,
+   "pitch": 0,
+   "desc": "位于星形庭院西南抬高露台下方（通用现代校园设计），通过通透玻璃幕墙与庭院相连，内设原木开放书架、阅览长桌与阶梯读书角。",
+   "photo": "photos/courtyard_top.webp",
+   "credit": "© 白羽 俯视定位"
+  },
+  {
+   "id": "art_gallery",
+   "label": "艺术馆展厅（室内）",
+   "zone": "cloud",
+   "floor": "庭院层 (±0.0 m)",
+   "pos": [
+    -30.0,
+    -48.5,
+    0.08
+   ],
+   "yaw": 185,
+   "pitch": -2,
+   "desc": "星形庭院西侧低层体块内的艺术馆展厅，洁白展墙配轨道射灯与中央展台，向外即见中央绿岛与开敞外廊。",
+   "photo": "photos/courtyard.webp",
+   "credit": "© 白羽（展厅入口实景）"
+  },
+  {
+   "id": "cloud_3f",
+   "label": "学术中心 3F 教室与外廊",
+   "zone": "cloud",
+   "floor": "3F (+12.5 m)",
+   "pos": [
+    -22.0,
+    -10.5,
+    12.55
+   ],
+   "yaw": 25,
+   "pitch": -2,
+   "desc": "依据 2024 三层平面图重建的开放式社交长廊与北翼示范教室群（常规教室、圆桌研讨室、创客实验室与教师办公室），可自由推门入室并俯瞰星形庭院。",
+   "photo": "photos/courtyard.webp",
+   "credit": "依据 Crossboundaries 04 三层平面"
+  },
+  {
+   "id": "track_field",
+   "label": "400 m 田径场与球场",
+   "zone": "exterior",
+   "floor": "操场 (±0.0 m)",
+   "pos": [
+    -198.0,
+    -72.0,
+    2.8
+   ],
+   "yaw": 20,
+   "pitch": -6,
+   "desc": "抬高式 400 m 标准 6 道跑道、105×68 m 11 人制条纹足球场及球门、9 级混凝土看台，东侧紧邻两片红土网球场与休憩亭，西侧配室外篮球场。",
+   "photo": "photos/track.webp",
+   "credit": "学校官方实景"
+  },
+  {
+   "id": "indoor_gym",
+   "label": "双室内篮球馆（室内）",
+   "zone": "sports",
+   "floor": "体育馆 (-6.0 m)",
+   "pos": [
+    -233.0,
+    -84.0,
+    -5.92
+   ],
+   "yaw": 108,
+   "pitch": 4,
+   "desc": "体育中心西翼北段大跨度无柱室内双篮球馆（原木主赛场 + 浅蓝训练场），完整还原裸露空间钢网架屋顶、高棚灯阵、落地采光窗与蓝色悬臂篮架。",
+   "photo": "photos/gym.webp",
+   "credit": "学校官方实景"
+  },
+  {
+   "id": "indoor_pool",
+   "label": "50 m 恒温游泳馆（室内）",
+   "zone": "sports",
+   "floor": "体育馆 (-6.0 m)",
+   "pos": [
+    -209.0,
+    -152.0,
+    -5.65
+   ],
+   "yaw": 112,
+   "pitch": -8,
+   "desc": "体育中心西翼南段 50×21 m 8 道标准室内恒温泳池，配备浅蓝马赛克池体、浮标泳道线、出发台、侧向观赛看台与白色吸音顶棚。",
+   "photo": "photos/pool.webp",
+   "credit": "学校官方实景"
+  },
+  {
+   "id": "auditorium",
+   "label": "艺术中心大剧场（室内）",
+   "zone": "sports",
+   "floor": "剧场 (-6.0 m)",
+   "pos": [
+    -141.0,
+    -128.0,
+    -2.5
+   ],
+   "yaw": -55,
+   "pitch": -8,
+   "desc": "体育及艺术中心东南翼大型阶梯剧场，还原暗红绒面礼堂座椅、木饰面吸音侧墙、深木色主舞台、三联大屏与顶部舞台面光灯桥。",
+   "photo": "photos/theater.webp",
+   "credit": "学校官方实景"
+  },
+  {
+   "id": "dorm_courtyard",
+   "label": "宿舍大庭院",
+   "zone": "exterior",
+   "floor": "庭院 (-0.2 m)",
+   "pos": [
+    162.7,
+    -81.0,
+    -0.08
+   ],
+   "yaw": 90,
+   "pitch": 10,
+   "desc": "宿舍综合楼标志性内向大庭院，四面环绕明亮白色外廊、顶部镂空钢格栅、室外折跑钢楼梯、白色坐凳花池与热带蒲葵。",
+   "photo": "photos/dorm_court.webp",
+   "credit": "© 白羽 实景摄影"
+  },
+  {
+   "id": "dorm_unit",
+   "label": "高中示范宿舍单元（室内）",
+   "zone": "dorm",
+   "floor": "2F (+3.4 m)",
+   "pos": [
+    156.5,
+    -51.5,
+    3.46
+   ],
+   "yaw": 18,
+   "pitch": -3,
+   "desc": "依据 Crossboundaries 高中宿舍轴测剖切图还原的 8 人共享单元：包含 4 间 2 人寝室（木格栅推拉门、上床下桌衣柜）、共享休闲自习厅及干湿分离公共卫浴。",
+   "photo": "photos/dorm_court.webp",
+   "credit": "依据 09 高中宿舍单元轴测图"
+  },
+  {
+   "id": "basket_ne",
+   "label": "宿舍东北蓝红篮球场",
+   "zone": "exterior",
+   "floor": "操场 (-0.2 m)",
+   "pos": [
+    162.0,
+    36.0,
+    -0.08
+   ],
+   "yaw": 35,
+   "pitch": 2,
+   "desc": "宿舍楼东北角天蓝主赛区配砖红缓冲带的室外标准篮球场，课余时段学生在此挥汗竞技。",
+   "photo": "photos/dorm_court.webp",
+   "credit": "依据校园实景"
+  }
+ ]
+}

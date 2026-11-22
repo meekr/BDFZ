@@ -1,7 +1,5 @@
-"""P2–P8 体育及艺术中心建模（直立锁边金属坡屋面、浅灰屋面压顶、细化阶梯看台含 3 过道/护栏/标语前墙、西南底层柱廊）。
+"""P2–T2 体育及艺术中心建模（外壳破壳透明玻璃幕墙 + 入口门洞 + 直立锁边金属坡屋面 + 细化看台 + 西南底层柱廊）。
 数据：data/bldg_sports.json。
-
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/bldg_sports.py').read())
 """
 import bpy, bmesh, json, os, math
 from mathutils import Vector, Matrix
@@ -33,6 +31,27 @@ def mat(name):
             if name in ('M_Cloud_RoofRim', 'M_Cloud_Slab'):
                 bsdf.inputs['Metallic'].default_value = 0.25
         m.diffuse_color = (r, g, b, 1)
+    return m
+
+
+def sports_glass_mat():
+    """半透明建筑玻璃幕墙：外看通透反光，内看可望见校园操场与蓝天。"""
+    m = bpy.data.materials.get('M_SportsGlass')
+    if m is None:
+        m = bpy.data.materials.new('M_SportsGlass')
+        m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new('ShaderNodeOutputMaterial')
+    b = nt.nodes.new('ShaderNodeBsdfPrincipled')
+    nt.links.new(b.outputs['BSDF'], out.inputs['Surface'])
+    b.inputs['Base Color'].default_value = (0.36, 0.50, 0.62, 1.0)
+    b.inputs['Roughness'].default_value = 0.08
+    b.inputs['Metallic'].default_value = 0.15
+    b.inputs['Alpha'].default_value = 0.34
+    if hasattr(m, 'blend_method'):
+        m.blend_method = 'BLEND'
+    m.diffuse_color = (0.36, 0.50, 0.62, 0.34)
     return m
 
 
@@ -72,24 +91,72 @@ def link(name, me, material, c):
     return o
 
 
-def walls(c):
-    bm = bmesh.new()
+def walls_hollow(c):
+    """T2 破壳外墙：半透明玻璃幕墙 + 暗灰竖梃框架，西南主入口与西侧入口留出高 4.2 m 敞开门洞供第一人称自由进出！"""
+    bm_gl = bmesh.new()
+    bm_fr = bmesh.new()
     outer = D['outer']
     zb = L['ground']
-    vb = [bm.verts.new((x, y, zb)) for x, y in outer]
-    vt = [bm.verts.new((x, y, eave_z(x))) for x, y in outer]
     n = len(outer)
+
+    # 入口开门区域（不封底段玻璃，允许自由步行进入体育中心大厅）
+    def is_doorway(x, y):
+        # 1) 西南底层柱廊主入口 (x in [-196, -176], y < -174)
+        if -196.0 <= x <= -176.0 and y < -174.0:
+            return True
+        # 2) 东北看台衔接口 (x in [-195, -182], y in [-132, -120])
+        if -195.0 <= x <= -180.0 and -132.0 <= y <= -118.0:
+            return True
+        return False
+
     for i in range(n):
         j = (i + 1) % n
-        bm.faces.new((vb[i], vb[j], vt[j], vt[i]))
-    bm.faces.new(list(reversed(vb)))
-    f_top = bm.faces.new(vt)
-    bmesh.ops.triangulate(bm, faces=[f_top])
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    me = bpy.data.meshes.new('Bldg_SportsArt_Mass')
-    bm.to_mesh(me)
-    bm.free()
-    return link('Bldg_SportsArt_Mass', me, 'M_Cloud_RoofPanel', c)
+        x0, y0 = outer[i]
+        x1, y1 = outer[j]
+        mx, my = (x0 + x1) * 0.5, (y0 + y1) * 0.5
+        zt0, zt1 = eave_z(x0), eave_z(x1)
+        z_bot = zb + 4.4 if is_doorway(mx, my) else zb
+        # 玻璃面片
+        vs = [
+            bm_gl.verts.new((x0, y0, z_bot)),
+            bm_gl.verts.new((x1, y1, z_bot)),
+            bm_gl.verts.new((x1, y1, zt1)),
+            bm_gl.verts.new((x0, y0, zt0)),
+        ]
+        bm_gl.faces.new(vs)
+
+        # 每隔 3 个顶点加一根暗灰立面竖梃 + 水平横梁（保持外部立面视觉分格）
+        if i % 3 == 0:
+            dx, dy = x1 - x0, y1 - y0
+            Lseg = max(0.05, math.hypot(dx, dy))
+            ux, uy = dx / Lseg * 0.14, dy / Lseg * 0.14
+            bm_fr.faces.new([
+                bm_fr.verts.new((x0, y0, z_bot)),
+                bm_fr.verts.new((x0 + ux, y0 + uy, z_bot)),
+                bm_fr.verts.new((x0 + ux, y0 + uy, zt0)),
+                bm_fr.verts.new((x0, y0, zt0)),
+            ])
+        # 中间层水平腰梁 (Z = 0.0 处)
+        if zt0 > 1.5 and zt1 > 1.5:
+            bm_fr.faces.new([
+                bm_fr.verts.new((x0, y0, -0.25)),
+                bm_fr.verts.new((x1, y1, -0.25)),
+                bm_fr.verts.new((x1, y1, 0.25)),
+                bm_fr.verts.new((x0, y0, 0.25)),
+            ])
+
+    bmesh.ops.recalc_face_normals(bm_gl, faces=bm_gl.faces)
+    me_gl = bpy.data.meshes.new('Bldg_SportsArt_Mass')
+    bm_gl.to_mesh(me_gl)
+    bm_gl.free()
+    o_gl = link('Bldg_SportsArt_Mass', me_gl, sports_glass_mat(), c)
+
+    bmesh.ops.recalc_face_normals(bm_fr, faces=bm_fr.faces)
+    me_fr = bpy.data.meshes.new('Bldg_SportsArt_Mullions')
+    bm_fr.to_mesh(me_fr)
+    bm_fr.free()
+    link('Bldg_SportsArt_Mullions', me_fr, 'M_Cloud_Slab', c)
+    return o_gl
 
 
 def roof(c):
@@ -153,7 +220,6 @@ def roof_rim(c):
 
 
 def bleachers(c):
-    """P8 升级：西翼东侧面向田径场的 9 级混凝土看台（含 3 条纵向阶梯过道、顶部及两侧栏杆、前挡墙标语贴图，official_19.jpg）。"""
     p0 = Vector((-193.0, -115.0))
     p1 = Vector((-217.5, -48.5))
     ax = (p1 - p0).normalized()
@@ -166,16 +232,13 @@ def bleachers(c):
     steps = 9
     depth_tot = 9.0
     h_tot = 5.4
-    # 0 = M_Paving（看台混凝土）, 1 = M_Cloud_Slab（栏杆）, 2 = M_Cloud_Core（踏步过道浅灰条）
     for k in range(steps):
         d0 = depth_tot * (k / steps)
         d1 = depth_tot * ((k + 1) / steps)
         zt = h_tot * (1.0 - k / steps)
         zb = 0.0
-        q0 = p0 + perp * d0
-        q1 = p1 + perp * d0
-        q2 = p1 + perp * d1
-        q3 = p0 + perp * d1
+        q0 = p0 + perp * d0; q1 = p1 + perp * d0
+        q2 = p1 + perp * d1; q3 = p0 + perp * d1
         vs = [bm.verts.new((q0.x, q0.y, zb)), bm.verts.new((q1.x, q1.y, zb)),
               bm.verts.new((q2.x, q2.y, zb)), bm.verts.new((q3.x, q3.y, zb)),
               bm.verts.new((q0.x, q0.y, zt)), bm.verts.new((q1.x, q1.y, zt)),
@@ -185,7 +248,6 @@ def bleachers(c):
         for j in range(4):
             bm.faces.new((vs[j], vs[(j + 1) % 4], vs[(j + 1) % 4 + 4], vs[j + 4])).material_index = 0
 
-    # 3 条纵向踏步过道（official_19.jpg 可见 3 处浅色踏步楼梯分隔看台）
     for frac in (0.22, 0.50, 0.78):
         s_mid = L_tot * frac
         for k in range(steps):
@@ -196,21 +258,17 @@ def bleachers(c):
             c1 = p0 + ax * (s_mid + 1.1) + perp * d0
             c2 = p0 + ax * (s_mid + 1.1) + perp * d1
             c3 = p0 + ax * (s_mid - 1.1) + perp * d1
-            f = bm.faces.new([bm.verts.new((c0.x, c0.y, zt)), bm.verts.new((c1.x, c1.y, zt)),
-                              bm.verts.new((c2.x, c2.y, zt)), bm.verts.new((c3.x, c3.y, zt))])
-            f.material_index = 2
+            bm.faces.new([bm.verts.new((c0.x, c0.y, zt)), bm.verts.new((c1.x, c1.y, zt)),
+                          bm.verts.new((c2.x, c2.y, zt)), bm.verts.new((c3.x, c3.y, zt))]).material_index = 2
 
-    # 顶部护栏（高 1.05 m）
-    r0 = p0 + perp * 0.25
-    r1 = p1 + perp * 0.25
+    r0 = p0 + perp * 0.25; r1 = p1 + perp * 0.25
     bm.faces.new([
         bm.verts.new((r0.x, r0.y, h_tot + 0.96)), bm.verts.new((r1.x, r1.y, h_tot + 0.96)),
         bm.verts.new((r1.x, r1.y, h_tot + 1.08)), bm.verts.new((r0.x, r0.y, h_tot + 1.08)),
     ]).material_index = 1
     for i in range(25):
         t = i / 24.0
-        qa = r0.lerp(r1, t)
-        qb = qa + ax * 0.08
+        qa = r0.lerp(r1, t); qb = qa + ax * 0.08
         bm.faces.new([
             bm.verts.new((qa.x, qa.y, h_tot)), bm.verts.new((qb.x, qb.y, h_tot)),
             bm.verts.new((qb.x, qb.y, h_tot + 1.05)), bm.verts.new((qa.x, qa.y, h_tot + 1.05)),
@@ -218,76 +276,56 @@ def bleachers(c):
 
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new('Bldg_SportsArt_Bleachers')
-    bm.to_mesh(me)
-    bm.free()
+    bm.to_mesh(me); bm.free()
     me.materials.append(mat('M_Paving'))
     me.materials.append(mat('M_Cloud_Slab'))
     me.materials.append(mat('M_Cloud_Core'))
     c.objects.link(bpy.data.objects.new('Bldg_SportsArt_Bleachers', me))
 
-    # 看台前缘校训标语挡墙（official_19.jpg：“体育强则中国强 体育兴则中国兴” + 奥运五环）
     bm_w = bmesh.new()
     uvl = bm_w.loops.layers.uv.new('UVMap')
     w0 = p0 + ax * 14.0 + perp * (depth_tot + 0.06)
     w1 = p0 + ax * (L_tot - 14.0) + perp * (depth_tot + 0.06)
-    vs = [
-        bm_w.verts.new((w0.x, w0.y, 0.05)),
-        bm_w.verts.new((w1.x, w1.y, 0.05)),
-        bm_w.verts.new((w1.x, w1.y, 2.35)),
-        bm_w.verts.new((w0.x, w0.y, 2.35)),
-    ]
+    vs = [bm_w.verts.new((w0.x, w0.y, 0.05)), bm_w.verts.new((w1.x, w1.y, 0.05)),
+          bm_w.verts.new((w1.x, w1.y, 2.35)), bm_w.verts.new((w0.x, w0.y, 2.35))]
     fw = bm_w.faces.new(vs)
     for lp, uv in zip(fw.loops, [(0, 0), (1, 0), (1, 1), (0, 1)]):
         lp[uvl].uv = uv
     me_w = bpy.data.meshes.new('Bldg_SportsArt_SloganWall')
-    bm_w.to_mesh(me_w)
-    bm_w.free()
+    bm_w.to_mesh(me_w); bm_w.free()
     me_w.materials.append(img_mat('M_BleacherSlogan', 'bleacher_slogan.png', 0.80, 0.0, (0.70, 0.70, 0.68, 1)))
     c.objects.link(bpy.data.objects.new('Bldg_SportsArt_SloganWall', me_w))
 
 
 def sw_colonnade(c):
-    """西南角一层外围柱廊（wx_04 左下角可见白色外廊圆柱列）。"""
     col_me = bpy.data.meshes.get('Bldg_Cloud_ColumnUnit')
     if col_me is None:
         bm = bmesh.new()
         bmesh.ops.create_cone(bm, cap_ends=True, segments=12, radius1=0.45, radius2=0.45, depth=1.0)
         bmesh.ops.translate(bm, vec=(0, 0, 0.5), verts=bm.verts)
         col_me = bpy.data.meshes.new('Bldg_Cloud_ColumnUnit')
-        bm.to_mesh(col_me)
-        bm.free()
+        bm.to_mesh(col_me); bm.free()
         col_me.materials.append(mat('M_Cloud_Core'))
-    outer = D['outer']
-    zb = L['ground']
-    idx = 0
+    outer = D['outer']; zb = L['ground']; idx = 0
     for i in range(len(outer)):
         x, y = outer[i]
-        # 西南弯角区域 (x < -190, y < -145)
         if x < -190.0 and y < -145.0:
             co = bpy.data.objects.new(f'Bldg_SportsArt_Col_{idx:02d}', col_me)
-            co.location = (x, y, zb)
-            co.scale = (1.0, 1.0, 5.2)
-            c.objects.link(co)
-            idx += 1
+            co.location = (x, y, zb); co.scale = (1.0, 1.0, 5.2)
+            c.objects.link(co); idx += 1
 
 
 def main():
     c = bpy.data.collections[COLL]
     for o in list(c.objects):
         bpy.data.objects.remove(o, do_unlink=True)
-    w = walls(c)
+    walls_hollow(c)
     roof(c)
     roof_rim(c)
     bleachers(c)
     sw_colonnade(c)
-    exec(open(os.path.join(ROOT, 'blender', 'build', 'uvtools.py')).read(), globals())
-    w.data.materials.clear()
-    w.data.materials.append(bpy.data.materials.get('M_Cloud_RoofPanel') or mat('M_Cloud_RoofRim'))
-    m_gl = image_mat('M_Cloud_GlassGrid', os.path.join(ROOT, 'blender', 'textures', 'cloud_glass.png'), 0.08, 0.4, (0.30, 0.38, 0.45, 1))
-    w.data.materials.append(m_gl)
-    wall_uv(w, 1.5, 4.5, L['ground'], lambda p, n: 1)
     bpy.ops.wm.save_mainfile()
-    print('sports objects', [(o.name, len(o.data.vertices)) for o in c.objects])
+    print('sports hollow shell objects', len(c.objects))
 
 
 main()
