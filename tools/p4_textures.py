@@ -22,25 +22,21 @@ def cloud_glass():
 
 
 def cloud_courtyard():
-    """学术中心庭院内侧开敞外廊（wx_15、wx_23、wx_32）：1 跨 4.2 m × 1 层 4.5 m。"""
+    """学术中心庭院内退教室立面（P8 已配真实 3D 外廊白圆廊柱与金属护栏）：洁白教室墙 + 暗框通长玻璃门窗 + 顶部暗灰吊顶带。"""
     W, H = 256, 288
-    im = np.full((H, W, 3), (218, 218, 216), np.uint8)               # 浅灰白内退教室墙
-    # 上部走廊阴影顶棚（深度感）
-    im[0:int(H * 0.24), :] = (105, 108, 112)
-    # 中部教室玻璃门窗（退进暗色）
-    cv2.rectangle(im, (int(W * 0.14), int(H * 0.24)), (int(W * 0.72), int(H * 0.78)), (75, 72, 66), -1)
-    for x in np.linspace(int(W * 0.14), int(W * 0.72), 4).astype(int):
-        cv2.line(im, (x, int(H * 0.24)), (x, int(H * 0.78)), (48, 48, 48), 3)
-    # 下部走廊楼面阴影
-    im[int(H * 0.78):H, :] = (128, 130, 132)
-    # 前景金属栏杆（离底 0..1.1 m = 约 28% 层高）
-    rt = H - int(H * 0.30)
-    cv2.line(im, (0, rt), (W, rt), (58, 60, 62), 4)
-    for x in range(0, W, 6):
-        cv2.line(im, (x, rt), (x, H), (72, 74, 76), 1)
-    # 白色廊柱（每跨一根，靠近左缘）
-    cv2.rectangle(im, (0, 0), (int(W * 0.09), H), (238, 238, 236), -1)
-    cv2.line(im, (int(W * 0.09), 0), (int(W * 0.09), H), (195, 195, 193), 2)
+    im = np.full((H, W, 3), (236, 237, 236), np.uint8)               # 洁白内退教室墙
+    # 上部走廊暗灰管线/吊顶阴影带
+    im[0:int(H * 0.22), :] = (108, 112, 118)
+    # 中下部教室玻璃门窗（宽约 62%，留出白色墙垛）
+    gx0, gx1 = int(W * 0.12), int(W * 0.74)
+    gy0, gy1 = int(H * 0.22), int(H * 0.94)
+    im[gy0:gy1, gx0:gx1] = (72, 68, 62)
+    cv2.rectangle(im, (gx0, gy0), (gx1, gy1), (42, 44, 46), 4)
+    for x in np.linspace(gx0, gx1, 4).astype(int):
+        cv2.line(im, (x, gy0), (x, gy1), (42, 44, 46), 3)
+    cv2.line(im, (gx0, int(H * 0.45)), (gx1, int(H * 0.45)), (42, 44, 46), 3)
+    # 底部踢脚线
+    im[int(H * 0.94):H, :] = (145, 146, 148)
     cv2.imwrite(os.path.join(OUT, 'cloud_courtyard.png'), im)
 
 

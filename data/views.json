@@ -2,10 +2,110 @@
  "note": "标准视点（Blender 世界坐标，Z 向上，米）。eye 相机位置，target 注视点，lens 为 36 mm 横向画幅等效焦距，画幅 16:9。Blender 标准渲染与网页预设视点共用。",
  "aspect": 1.7778,
  "views": [
-  {"id": "aerial", "label": "鸟瞰", "eye": [280, -400, 250], "target": [-40, -50, 0], "lens": 40},
-  {"id": "courtyard", "label": "星形庭院", "eye": [5, -22, 36], "target": [-5, -90, 0], "lens": 20},
-  {"id": "north_entrance", "label": "北侧主入口", "eye": [-35, 150, 4], "target": [-30, 20, 6], "lens": 24},
-  {"id": "dorm_courts", "label": "宿舍庭院", "eye": [290, -120, 110], "target": [150, -50, 0], "lens": 32},
-  {"id": "sports_art", "label": "体育及艺术中心", "eye": [-90, -280, 70], "target": [-175, -110, 6], "lens": 28}
+  {
+   "id": "aerial",
+   "label": "鸟瞰",
+   "eye": [
+    280,
+    -400,
+    250
+   ],
+   "target": [
+    -40,
+    -50,
+    0
+   ],
+   "lens": 40
+  },
+  {
+   "id": "courtyard",
+   "label": "星形庭院",
+   "eye": [
+    5,
+    -22,
+    36
+   ],
+   "target": [
+    -5,
+    -90,
+    0
+   ],
+   "lens": 20
+  },
+  {
+   "id": "north_entrance",
+   "label": "北侧主入口",
+   "eye": [
+    -35,
+    150,
+    4
+   ],
+   "target": [
+    -30,
+    20,
+    6
+   ],
+   "lens": 24
+  },
+  {
+   "id": "dorm_courts",
+   "label": "宿舍庭院",
+   "eye": [
+    290,
+    -120,
+    110
+   ],
+   "target": [
+    150,
+    -50,
+    0
+   ],
+   "lens": 32
+  },
+  {
+   "id": "sports_art",
+   "label": "体育及艺术中心",
+   "eye": [
+    -90,
+    -280,
+    70
+   ],
+   "target": [
+    -175,
+    -110,
+    6
+   ],
+   "lens": 28
+  },
+  {
+   "id": "sports_courts",
+   "label": "运动场与球场",
+   "eye": [
+    -115,
+    125,
+    76
+   ],
+   "target": [
+    -185,
+    5,
+    0
+   ],
+   "lens": 26
+  },
+  {
+   "id": "courtyard_eye",
+   "label": "星形庭院人视",
+   "eye": [
+    14,
+    -75,
+    11
+   ],
+   "target": [
+    -12,
+    -32,
+    5
+   ],
+   "lens": 24
+  }
  ]
 }

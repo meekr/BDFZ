@@ -4,7 +4,7 @@
 import bpy, os
 ROOT = '/Users/perrylei/repos/BDFZ_V3'
 OUT = os.path.join(ROOT, 'web', 'public', 'bdfz.glb')
-LAYER = {'Bldg_': 'building', 'Landscape': 'landscape', 'Site': 'site'}
+LAYER = {'Bldg_': 'building', 'Landscape': 'landscape', 'Site': 'site', 'People': 'people'}
 
 keep = []
 for c in bpy.data.collections:

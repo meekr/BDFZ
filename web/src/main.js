@@ -39,7 +39,7 @@ const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 1, 8000
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.maxPolarAngle = Math.PI * 0.495;
-controls.minDistance = 15;
+controls.minDistance = 8;
 controls.maxDistance = 2500;
 
 // 与 Blender 日光一致：太阳在西南，高度 40°
@@ -114,23 +114,29 @@ const gltf = await loader.loadAsync('./bdfz.glb', (e) => {
   if (e.total) status.textContent = `加载模型… ${Math.round((e.loaded / e.total) * 100)}%`;
 });
 const model = gltf.scene;
-const layers = { building: [], landscape: [], site: [] };
+const layers = { building: [], landscape: [], site: [], people: [] };
 const byBldg = {};
 model.traverse((o) => {
   let p = o, layer, bldg;
   while (p && !layer) { layer = p.userData.layer; bldg = p.userData.bldg; p = p.parent; }
   o.userData.layer = layer; o.userData.bldg = bldg;
   if (!o.isMesh) return;
-  o.castShadow = layer !== 'site';
+  o.castShadow = layer !== 'site' && !/CourtFloor|CourtLawn|Island_|PlazaAccent|CourtGrass/.test(o.name);
   o.receiveShadow = true;
   if (layer) layers[layer].push(o);
   if (bldg) (byBldg[bldg] ||= []).push(o);
   const mats = Array.isArray(o.material) ? o.material : [o.material];
-  for (const m of mats) if (m.transparent && m.opacity > 0.9) m.transparent = false;
+  for (const m of mats) { if (m.transparent && m.opacity > 0.9) m.transparent = false; if (m.transparent) { m.depthWrite = false; m.side = THREE.DoubleSide; } }
 });
 scene.add(model);
 status.textContent = `模型 ${(performance.now() - t0).toFixed(0)} ms`;
 
+const showPeople = params.get('people') !== '0';
+const peopleCb = document.querySelector('[data-layer="people"]');
+if (peopleCb && !showPeople) {
+  peopleCb.checked = false;
+  layers.people.forEach((o) => (o.visible = false));
+}
 document.querySelectorAll('[data-layer]').forEach((cb) => {
   cb.onchange = () => layers[cb.dataset.layer].forEach((o) => (o.visible = cb.checked));
 });
