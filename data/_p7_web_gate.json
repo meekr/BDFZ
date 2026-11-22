@@ -1,27 +1,27 @@
 {
  "aerial": {
   "median_pct": 0.0,
-  "p90_pct": 0.125,
+  "p90_pct": 0.215,
   "matched_frac": 1.0
  },
  "courtyard": {
-  "median_pct": 0.062,
-  "p90_pct": 0.787,
-  "matched_frac": 0.92
+  "median_pct": 0.098,
+  "p90_pct": 0.684,
+  "matched_frac": 1.0
  },
  "north_entrance": {
-  "median_pct": 0.2,
-  "p90_pct": 1.0,
-  "matched_frac": 0.98
+  "median_pct": 0.293,
+  "p90_pct": 1.17,
+  "matched_frac": 1.0
  },
  "dorm_courts": {
   "median_pct": 0.0,
-  "p90_pct": 0.137,
+  "p90_pct": 0.195,
   "matched_frac": 1.0
  },
  "sports_art": {
   "median_pct": 0.0,
-  "p90_pct": 0.25,
-  "matched_frac": 0.99
+  "p90_pct": 0.391,
+  "matched_frac": 1.0
  }
 }

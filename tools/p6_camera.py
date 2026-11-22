@@ -1,15 +1,14 @@
 """P6 照片相机匹配。
 
-做法：在照片上沿可辨认的轮廓（学术中心檐口外沿、跑道外沿、宿舍女儿墙等）人工描点（原图像素），
-存入 data/p6_traces.json；模型侧对应的三维曲线由 data/*.json 生成并按 0.5 m 加密。
-代价 = 每个照片描点到投影后模型曲线的最近距离（照片→模型单向，故遮挡、出画不影响），
-点对应（如足球场中圈 = 跑道中心）另计。use = "fit" 的描线参与求解，"check" 的只用于事后检验。
+做法：在照片上沿可辨认的轮廓（学术中心檐口外沿/内院沿、跑道外沿、宿舍女儿墙/大庭院、体育中心斜坡檐口等）
+人工描点（原图像素），存入 data/p6_traces.json；模型侧对应的三维曲线由 data/*.json 生成并按 0.5 m 加密。
+代价 = 每个照片描点到投影后模型曲线的最近距离（照片→模型单向，故遮挡、出画不影响）。
+use = "fit" 的描线参与求解，"check" 的只用于事后检验。
 
-相机参数 p = [x, y, z, yaw°, pitch°, roll°, f, k1]：k1 为一阶径向畸变；yaw 为视线方位（自 +X 逆时针），pitch 为俯角，
+相机参数 p = [x, y, z, yaw°, pitch°, roll°, f, k1]：yaw 为视线方位（自 +X 逆时针），pitch 为俯角，
 f 为像素焦距（按 W_WORK 宽）。
-注：曾试过对 Canny 边缘做倒角匹配，航拍照片纹理边缘过密，代价面平坦、收敛到错误视角，已弃用。
 """
-import os, json, cv2, numpy as np
+import os, json, math, cv2, numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W_WORK = 1180
@@ -22,6 +21,8 @@ def pattern_search(fun, x0, step, shrink=0.5, min_step=0.005, max_eval=8000):
     while s.max() > min_step and n < max_eval:
         imp = False
         for k in range(len(x)):
+            if s[k] == 0:
+                continue
             for sg in (1, -1):
                 y = x.copy(); y[k] += sg * s[k]; fy = fun(y); n += 1
                 if fy < fx - 1e-9:
@@ -49,7 +50,6 @@ def project(P, p, W, H):
     x = (Q @ rt) / np.where(ok, z, 1)
     y = (Q @ up) / np.where(ok, z, 1)
     if len(p) > 7 and p[7]:
-        # 一阶径向畸变，r 以半幅宽归一化
         k = 1 + p[7] * ((x * f) ** 2 + (y * f) ** 2) / (W / 2) ** 2
         x, y = x * k, y * k
     return W / 2 + f * x, H / 2 - f * y, ok
@@ -72,15 +72,20 @@ def _load(name):
 
 
 def corners(poly, tol=2.0):
-    """闭合轮廓的转角（Douglas-Peucker 简化，容差 m），按原轮廓顺序。"""
     a = cv2.approxPolyDP(np.asarray(poly, np.float32).reshape(-1, 1, 2), tol, True).reshape(-1, 2)
     return a.astype(float)
 
 
+def _cloud_t(xy):
+    P3 = _load('bldg_cloud_p3.json')
+    ang = math.radians(P3.get('ramp_axis_deg', -10.0))
+    u_s, u_n = P3.get('ramp_u', P3['ramp_y'])
+    u = xy[:, 1] * math.cos(ang) + xy[:, 0] * math.sin(ang)
+    return np.clip((u - u_s) / (u_n - u_s), 0.0, 1.0)
+
+
 def curve(name):
-    """返回 (N,3) 世界坐标点。name 可带 '@a:b'，取闭合轮廓从转角 a 到 b 的一段（沿轮廓正向）。
-    学术中心转角编号见 corners(bldg_cloud.json shell outer)：C0 东北角，C1 西北角，C2/C3 西尖，
-    C4/C5 南端，C6 南缺口，C7 东南角，C8/C9 东尖。"""
+    """返回 (N,3) 世界坐标点。name 可带 '@a:b'，取闭合轮廓从转角 a 到 b 的一段。"""
     if '@' in name:
         base, rng = name.split('@')
         a, b = (int(v) for v in rng.split(':'))
@@ -88,22 +93,24 @@ def curve(name):
         C = corners(_outline(base))
         ia, ib = (int(np.argmin(np.hypot(*(P[:, :2] - C[k]).T))) for k in (a, b))
         return P[ia:ib + 1] if ia <= ib else np.vstack([P[ia:], P[:ib + 1]])
-    if name.startswith('cloud_level:'):
-        # 学术中心外轮廓在某楼层标高处（P3 levels，南北线性过渡），可带偏移：cloud_level:f1:-0.8
+    if name.startswith('cloud_level:') or name.startswith('cloud_court_level:'):
         parts = name.split(':')
         P3 = _load('bldg_cloud_p3.json')
-        s, n = P3['levels'][parts[1]]; y_s, y_n = P3['ramp_y']
+        s, n = P3['levels'][parts[1]]
         dz = float(parts[2]) if len(parts) > 2 else 0.0
-        xy = _densify(_load('bldg_cloud.json')['shell'][0]['outer'])
-        t = np.clip((xy[:, 1] - y_s) / (y_n - y_s), 0, 1)
+        sh = _load('bldg_cloud.json')['shell'][0]
+        ring = max(sh['holes'], key=len) if name.startswith('cloud_court_level:') else sh['outer']
+        xy = _densify(ring)
+        t = _cloud_t(xy)
         return np.c_[xy, s + (n - s) * t + dz]
-    if name == 'cloud_eave':
+    if name in ('cloud_eave', 'cloud_court_eave'):
         D = _load('bldg_cloud.json'); L = D['levels']
-        xy = _densify(D['shell'][0]['outer'])
-        y0, y1 = L['ramp_y'][1], L['ramp_y'][0]          # 北 -40 → 南 -85
-        zn, zs = L['eave']['north'], L['eave']['south']
-        z = zn + np.clip((y0 - xy[:, 1]) / (y0 - y1), 0, 1) * (zs - zn)
-        return np.c_[xy, z]
+        sh = D['shell'][0]
+        ring = max(sh['holes'], key=len) if name == 'cloud_court_eave' else sh['outer']
+        xy = _densify(ring)
+        t = _cloud_t(xy)
+        zs, zn = L['eave']['south'], L['eave']['north']
+        return np.c_[xy, zs + (zn - zs) * t]
     if name in ('track_outer', 'track_center'):
         T = _load('_track_fit.json')
         c = np.array(T['center'])
@@ -122,20 +129,37 @@ def curve(name):
         return np.c_[P, np.full(len(P), 0.1)]
     if name == 'dorm_parapet':
         D = _load('bldg_dorm.json'); L = D['levels']
+        # 与 bldg_dorm.py 屋顶挑檐构架顶高一致（z_body + 0.85 ≈ 19.0）
         z = L['ground'] + L['floors'] * L['floor_h'] + L['parapet']
         xy = _densify(D['shell'][0]['outer'])
         return np.c_[xy, np.full(len(xy), z)]
+    if name.startswith('dorm_court:'):
+        # dorm_court:<hole_idx>:<z>
+        _, idx_s, z_s = name.split(':')
+        D = _load('bldg_dorm.json')
+        xy = _densify(D['shell'][0]['holes'][int(idx_s)])
+        return np.c_[xy, np.full(len(xy), float(z_s))]
     if name == 'sports_eave':
-        D = _load('bldg_sports.json')
+        D = _load('bldg_sports.json'); L = D['levels']
         xy = _densify(D['outer'])
-        return np.c_[xy, np.full(len(xy), D['levels']['eave'])]
+        x0, x1 = L.get('slope_x', [-148.0, -74.0])
+        ew, ee = L.get('eave_west', L['eave']), L.get('eave_east', L['eave'])
+        t = np.clip((xy[:, 0] - x0) / (x1 - x0), 0.0, 1.0)
+        z = ew + (ee - ew) * t
+        return np.c_[xy, z]
     raise KeyError(name)
 
 
 def _outline(base):
     if base.startswith('cloud_level:'):
         base = 'cloud_eave'
+    elif base.startswith('cloud_court_level:'):
+        base = 'cloud_court_eave'
+    elif base.startswith('dorm_court:'):
+        idx = int(base.split(':')[1])
+        return _load('bldg_dorm.json')['shell'][0]['holes'][idx]
     return {'cloud_eave': lambda: _load('bldg_cloud.json')['shell'][0]['outer'],
+            'cloud_court_eave': lambda: max(_load('bldg_cloud.json')['shell'][0]['holes'], key=len),
             'dorm_parapet': lambda: _load('bldg_dorm.json')['shell'][0]['outer'],
             'sports_eave': lambda: _load('bldg_sports.json')['outer']}[base]()
 
@@ -172,11 +196,11 @@ class Photo:
     def fit(self, p0=None, restarts=8, seed=0):
         p0 = np.array(p0 if p0 is not None else self.T['p0'], float)
         p0 = np.r_[p0, np.zeros(8 - len(p0))]
-        sc = np.array([5, 5, 5, 1.5, 1.5, 0.5, 30, 0.02 if self.T.get('distortion', True) else 0])
+        sc = np.array(self.T.get('scale', [5, 5, 5, 1.5, 1.5, 0.5, 30, 0.02 if self.T.get('distortion', True) else 0]), float)
         rng = np.random.default_rng(seed)
         best = (p0, self.err(p0))
         for k in range(restarts):
-            st = best[0] + (rng.normal(0, 2, 8) * sc if k else 0)
+            st = best[0] + (rng.normal(0, 1.5, 8) * sc if k else 0)
             q, f = pattern_search(lambda q: self.err(st + q * sc), np.zeros(8), [1.0] * 8)
             if f < best[1]:
                 best = (st + q * sc, f)
@@ -220,7 +244,6 @@ class Photo:
 
 
 def blender_camera(p, W, H):
-    """转为 Blender 相机：返回 (location, rotation_euler XYZ 弧度, sensor_width=36 时的 lens_mm)。"""
     d, rt, up = rot(*p[3:6])
     M = np.c_[rt, up, -d]
     sy = np.hypot(M[0, 0], M[1, 0])
