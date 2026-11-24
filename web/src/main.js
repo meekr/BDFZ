@@ -115,8 +115,16 @@ scene.add(far);
 
 const statusEl = document.getElementById('status');
 const panel = document.getElementById('panel');
-if (mobile) panel.classList.add('collapsed');
-panel.querySelector('header').onclick = () => panel.classList.toggle('collapsed');
+const panelToggle = document.getElementById('panel-toggle');
+function setPanelCollapsed(collapsed) {
+  panel.classList.toggle('collapsed', collapsed);
+  if (panelToggle) {
+    panelToggle.setAttribute('aria-expanded', String(!collapsed));
+    panelToggle.title = collapsed ? '展开面板' : '折叠面板';
+  }
+}
+if (mobile) setPanelCollapsed(true);
+panel.querySelector('header').onclick = () => setPanelCollapsed(!panel.classList.contains('collapsed'));
 const info = await (await fetch('./scene.json')).json();
 const tourStops = info.tour?.stops || [];
 
@@ -284,23 +292,48 @@ const minimap = new Minimap(document.getElementById('minimap'), info.overlays.ex
 
 for (let i = 0; i < tourStops.length; i++) {
   const st = tourStops[i];
+  const isIndoor = st.zone !== 'exterior';
+  const cleanLabel = st.label.replace(/（室内）$/, '');
   const b = document.createElement('button');
-  b.textContent = st.label;
+  b.type = 'button';
+  b.className = 'stop-item';
+  b.setAttribute('role', 'option');
+  b.setAttribute('aria-selected', 'false');
   b.dataset.id = st.id;
-  if (st.zone !== 'exterior') b.classList.add('indoor');
+
+  const num = document.createElement('span');
+  num.className = 'stop-num';
+  num.textContent = String(i + 1).padStart(2, '0');
+
+  const name = document.createElement('span');
+  name.className = 'stop-name';
+  name.textContent = cleanLabel;
+
+  const badge = document.createElement('span');
+  badge.className = isIndoor ? 'stop-badge indoor' : 'stop-badge';
+  badge.textContent = isIndoor ? '室内' : '室外';
+
+  b.append(num, name, badge);
   b.onclick = () => goToStop(st.id);
   stopsEl.appendChild(b);
 
   const opt = document.createElement('option');
   opt.value = st.id;
-  opt.textContent = `${i + 1}/${tourStops.length} ${st.label}`;
+  opt.textContent = `${i + 1}/${tourStops.length} ${cleanLabel}`;
   tourSel.appendChild(opt);
 }
 
 function updateStopUI(st) {
   tourSel.value = st.id;
-  mmFloorEl.textContent = `${st.label} · ${st.floor}`;
-  document.querySelectorAll('#stops button').forEach((b) => b.classList.toggle('on', b.dataset.id === st.id));
+  const cleanLabel = st.label.replace(/（室内）$/, '');
+  mmFloorEl.textContent = `${cleanLabel} · ${st.floor}`;
+  minimap.setActiveStop(st.id);
+  document.querySelectorAll('#stops button').forEach((b) => {
+    const active = b.dataset.id === st.id;
+    b.classList.toggle('on', active);
+    b.setAttribute('aria-selected', String(active));
+    if (active) b.scrollIntoView({ block: 'nearest' });
+  });
   document.getElementById('photo-title').textContent = st.label;
   document.getElementById('photo-floor').textContent = st.floor;
   document.getElementById('photo-desc').textContent = st.desc;
@@ -331,8 +364,8 @@ async function enterTour(stopId = 'north_gate') {
   controls.enabled = false;
   card.hidden = true;
   labels.forEach((l) => (l.visible = false));
-  btnOrbit.classList.remove('on');
-  btnFps.classList.add('on');
+  btnOrbit.classList.remove('on'); btnOrbit.setAttribute('aria-selected', 'false');
+  btnFps.classList.add('on'); btnFps.setAttribute('aria-selected', 'true');
   secOrbit.hidden = true;
   secStops.hidden = false;
   tourBar.hidden = false;
@@ -359,23 +392,35 @@ function exitTour(restoreAerial = true) {
   teleport.hide();
   chunkLoader.updateForPosition(fps.feetPos, false);
   controls.enabled = true;
-  btnOrbit.classList.add('on');
-  btnFps.classList.remove('on');
+  btnOrbit.classList.add('on'); btnOrbit.setAttribute('aria-selected', 'true');
+  btnFps.classList.remove('on'); btnFps.setAttribute('aria-selected', 'false');
   secOrbit.hidden = false;
   secStops.hidden = true;
   tourBar.hidden = true;
   minimapWrap.hidden = true;
-  photoModal.hidden = true;
+  setPhotoOpen(false);
   joyPad.hidden = true;
   labels.forEach((l) => (l.visible = labelsToggle.checked));
   applyFov();
   if (restoreAerial) setView('aerial', true);
 }
 
+const tourPhotoBtn = document.getElementById('tour-photo-btn');
+const icPlay = tourAutoBtn.querySelector('.ic-play');
+const icPause = tourAutoBtn.querySelector('.ic-pause');
+const autoLabel = tourAutoBtn.querySelector('.tb-auto-label');
+
+function setPhotoOpen(open) {
+  photoModal.hidden = !open;
+  tourPhotoBtn.classList.toggle('on', open);
+}
+
 function stopAutoTour() {
   if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
   tourAutoBtn.classList.remove('on');
-  tourAutoBtn.textContent = '▶ 自动导览';
+  if (icPlay) icPlay.hidden = false;
+  if (icPause) icPause.hidden = true;
+  if (autoLabel) autoLabel.textContent = '自动导览';
 }
 
 btnOrbit.onclick = () => { if (mode !== 'orbit') exitTour(true); };
@@ -384,12 +429,14 @@ document.getElementById('tour-exit').onclick = () => exitTour(true);
 document.getElementById('tour-prev').onclick = () => goToStop(tourStops[(currentStopIdx - 1 + tourStops.length) % tourStops.length].id);
 document.getElementById('tour-next').onclick = () => goToStop(tourStops[(currentStopIdx + 1) % tourStops.length].id);
 tourSel.onchange = () => goToStop(tourSel.value);
-document.getElementById('tour-photo-btn').onclick = () => { photoModal.hidden = !photoModal.hidden; };
-document.getElementById('photo-close').onclick = () => { photoModal.hidden = true; };
+tourPhotoBtn.onclick = () => setPhotoOpen(photoModal.hidden);
+document.getElementById('photo-close').onclick = () => setPhotoOpen(false);
 tourAutoBtn.onclick = () => {
   if (autoTimer) { stopAutoTour(); return; }
   tourAutoBtn.classList.add('on');
-  tourAutoBtn.textContent = '⏸ 暂停导览';
+  if (icPlay) icPlay.hidden = true;
+  if (icPause) icPause.hidden = false;
+  if (autoLabel) autoLabel.textContent = '暂停导览';
   autoTimer = setInterval(() => {
     goToStop(tourStops[(currentStopIdx + 1) % tourStops.length].id);
   }, 5500);
@@ -434,15 +481,36 @@ const texLoader = new THREE.TextureLoader();
 const texCache = {};
 const sel = document.getElementById('overlay');
 for (const o of info.overlays.items) sel.appendChild(Object.assign(document.createElement('option'), { value: o.id, textContent: o.label }));
+const overlaySlider = document.getElementById('overlay-opacity');
+const overlaySliderWrap = document.getElementById('overlay-slider-wrap');
+const overlayValEl = document.getElementById('overlay-val');
+
+function syncOverlaySlider() {
+  const v = +overlaySlider.value;
+  overlaySlider.style.setProperty('--attr-min', overlaySlider.min || '0.1');
+  overlaySlider.style.setProperty('--attr-max', overlaySlider.max || '1');
+  overlaySlider.style.setProperty('--control-value', String(v));
+  const pct = `${Math.round(v * 100)}%`;
+  overlaySlider.setAttribute('aria-valuetext', pct);
+  if (overlayValEl) overlayValEl.textContent = sel.value ? pct : '未启用';
+  overlaySlider.disabled = !sel.value;
+  if (overlaySliderWrap) overlaySliderWrap.classList.toggle('disabled', !sel.value);
+}
+syncOverlaySlider();
+
 sel.onchange = async () => {
   const item = info.overlays.items.find((o) => o.id === sel.value);
+  syncOverlaySlider();
   if (!item) { overlay.visible = false; return; }
   const tex = (texCache[item.id] ||= await texLoader.loadAsync(`./${item.file}`));
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   overlayMat.map = tex; overlayMat.needsUpdate = true; overlay.visible = true;
 };
-document.getElementById('overlay-opacity').oninput = (e) => (overlayMat.opacity = +e.target.value);
+overlaySlider.oninput = () => {
+  overlayMat.opacity = +overlaySlider.value;
+  syncOverlaySlider();
+};
 
 // URL 参数直达第一人称站点 (?mode=fps&stop=indoor_gym)
 if (params.get('mode') === 'fps') {

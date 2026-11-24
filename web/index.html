@@ -3,81 +3,201 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>北大附中海口学校 · 三维模型与一人称漫游</title>
+    <title>北大附中海口学校 · 三维校园与沉浸漫游</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <div id="app"></div>
-    <aside id="panel">
-      <header>
-        <h1>北大附中海口学校</h1>
-        <p class="sub">三维校园 · 鸟瞰浏览 & 一人称内外漫游</p>
-      </header>
-      <section>
-        <div class="mode-switch" role="tablist">
-          <button id="btn-mode-orbit" class="on" role="tab">鸟瞰浏览</button>
-          <button id="btn-mode-fps" role="tab">第一人称漫游</button>
+
+    <!-- 左侧主控面板（shadcn Card / Sidebar Panel） -->
+    <aside id="panel" aria-label="校园视图与图层控制">
+      <header class="panel-header">
+        <div class="panel-brand">
+          <h1>北大附中海口学校</h1>
+          <p class="sub">三维校园 · 鸟瞰与第一人称漫游</p>
         </div>
-      </section>
-      <section id="sec-orbit-views">
-        <h2>预设视点</h2>
-        <div id="views" class="chips"></div>
-      </section>
-      <section id="sec-tour-stops" hidden>
-        <h2>漫游站点（室外 + 6 大室内）</h2>
-        <div id="stops" class="chips"></div>
-      </section>
-      <section>
-        <h2>图层</h2>
-        <label><input type="checkbox" data-layer="building" checked /> 建筑</label>
-        <label><input type="checkbox" data-layer="landscape" checked /> 景观</label>
-        <label><input type="checkbox" data-layer="site" checked /> 场地</label>
-        <label><input type="checkbox" data-layer="people" checked /> 师生人物</label>
-        <label><input type="checkbox" id="labels-toggle" checked /> 名称标注</label>
-      </section>
-      <section>
-        <h2>2024 图纸叠图</h2>
-        <select id="overlay"><option value="">不显示</option></select>
-        <input id="overlay-opacity" type="range" min="0.1" max="1" step="0.05" value="0.75" aria-label="叠图透明度" />
-      </section>
-      <p id="status">加载模型…</p>
+        <button id="panel-toggle" class="icon-btn" type="button" aria-expanded="true" aria-label="折叠或展开控制面板" title="折叠面板">
+          <svg class="ic ic-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </header>
+
+      <div class="panel-body">
+        <!-- 模式切换（shadcn Tabs） -->
+        <div class="mode-switch" role="tablist" aria-label="浏览模式">
+          <button id="btn-mode-orbit" class="on" type="button" role="tab" aria-selected="true">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <span>鸟瞰浏览</span>
+          </button>
+          <button id="btn-mode-fps" type="button" role="tab" aria-selected="false">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/></svg>
+            <span>第一人称</span>
+          </button>
+        </div>
+
+        <!-- 鸟瞰预设视点 -->
+        <section id="sec-orbit-views" class="panel-section">
+          <div class="sec-head">
+            <h2>预设视点</h2>
+            <span class="sec-meta">7 处视角</span>
+          </div>
+          <div id="views" class="view-grid"></div>
+        </section>
+
+        <!-- 第一人称漫游站点（紧凑有序列表 + 室内/室外徽章） -->
+        <section id="sec-tour-stops" class="panel-section" hidden>
+          <div class="sec-head">
+            <h2>漫游站点</h2>
+            <span class="sec-meta">室外 + 6 室内</span>
+          </div>
+          <div id="stops" class="stop-list" role="listbox" aria-label="漫游站点列表"></div>
+        </section>
+
+        <div class="separator" role="separator"></div>
+
+        <!-- 图层开关（shadcn Switch 控件） -->
+        <section class="panel-section">
+          <div class="sec-head">
+            <h2>场景图层</h2>
+          </div>
+          <div class="switch-grid">
+            <label class="switch-item">
+              <span class="switch-label">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                建筑
+              </span>
+              <input type="checkbox" class="ui-switch" role="switch" data-layer="building" checked />
+            </label>
+            <label class="switch-item">
+              <span class="switch-label">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>
+                景观
+              </span>
+              <input type="checkbox" class="ui-switch" role="switch" data-layer="landscape" checked />
+            </label>
+            <label class="switch-item">
+              <span class="switch-label">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+                场地
+              </span>
+              <input type="checkbox" class="ui-switch" role="switch" data-layer="site" checked />
+            </label>
+            <label class="switch-item">
+              <span class="switch-label">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                师生
+              </span>
+              <input type="checkbox" class="ui-switch" role="switch" data-layer="people" checked />
+            </label>
+            <label class="switch-item switch-item-wide">
+              <span class="switch-label">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                建筑名称标注
+              </span>
+              <input type="checkbox" class="ui-switch" role="switch" id="labels-toggle" checked />
+            </label>
+          </div>
+        </section>
+
+        <div class="separator" role="separator"></div>
+
+        <!-- 2024 图纸叠图（shadcn Select + Slider） -->
+        <section class="panel-section">
+          <div class="sec-head">
+            <label for="overlay" class="sec-title">2024 图纸叠图</label>
+            <span id="overlay-val" class="sec-meta tabular">75%</span>
+          </div>
+          <select id="overlay" name="overlay" class="ui-select">
+            <option value="">不显示叠图</option>
+          </select>
+          <div id="overlay-slider-wrap" class="slider-wrap">
+            <input id="overlay-opacity" class="ui-slider" type="range" min="0.1" max="1" step="0.05" value="0.75" aria-label="叠图透明度" aria-valuetext="75%" />
+          </div>
+        </section>
+
+        <footer class="panel-footer">
+          <span class="status-dot" aria-hidden="true"></span>
+          <p id="status">加载模型…</p>
+        </footer>
+      </div>
     </aside>
 
-    <!-- 建筑信息卡（鸟瞰模式） -->
-    <article id="card" hidden>
-      <button id="card-close" aria-label="关闭">×</button>
-      <h3 id="card-name"></h3>
-      <p id="card-sub" class="sub"></p>
+    <!-- 建筑信息卡（鸟瞰模式点击建筑弹出） -->
+    <article id="card" class="floating-card" hidden aria-live="polite">
+      <div class="card-head">
+        <div>
+          <h3 id="card-name"></h3>
+          <p id="card-sub" class="sub"></p>
+        </div>
+        <button id="card-close" class="icon-btn" type="button" aria-label="关闭信息卡">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
       <ul id="card-facts"></ul>
       <p id="card-src" class="src"></p>
     </article>
 
-    <!-- 第一人称迷你小地图 -->
-    <div id="minimap-wrap" hidden>
-      <div class="mm-head"><span id="mm-floor">校园总图</span><span class="mm-tip">点击彩点跳转</span></div>
-      <canvas id="minimap" width="220" height="148"></canvas>
-    </div>
-
-    <!-- 第一人称底部导览条 -->
-    <div id="tour-bar" hidden>
-      <button id="tour-prev" title="上一站">‹ 上一站</button>
-      <select id="tour-select" aria-label="选择导览站点"></select>
-      <button id="tour-next" title="下一站">下一站 ›</button>
-      <button id="tour-auto" title="自动巡游">▶ 自动导览</button>
-      <button id="tour-photo-btn" title="实景照片对照">📷 实景对照</button>
-      <button id="tour-exit" class="ghost">退出漫游</button>
-      <span class="tour-hint">WASD 移动 · 拖拽转视角 · 单击地面瞬移</span>
-    </div>
-
-    <!-- 实景照片对照弹窗 -->
-    <article id="photo-modal" hidden>
-      <button id="photo-close" aria-label="关闭">×</button>
-      <h3 id="photo-title"></h3>
-      <p id="photo-floor" class="sub"></p>
-      <img id="photo-img" alt="校园实景照片" />
+    <!-- 实景照片对照卡片（第一人称按需弹出） -->
+    <article id="photo-modal" class="floating-card" hidden aria-live="polite">
+      <div class="card-head">
+        <div>
+          <h3 id="photo-title"></h3>
+          <p id="photo-floor" class="sub"></p>
+        </div>
+        <button id="photo-close" class="icon-btn" type="button" aria-label="关闭实景对照">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="photo-frame">
+        <img id="photo-img" src="./photos/north_stone.webp" alt="校园实景照片" />
+      </div>
       <p id="photo-desc"></p>
       <p id="photo-credit" class="src"></p>
     </article>
+
+    <!-- 第一人称高精迷你小地图（独立固定宽度，绝不与导览栏重叠） -->
+    <div id="minimap-wrap" hidden>
+      <div class="mm-head">
+        <span id="mm-floor" class="mm-title">校园总图</span>
+        <span class="mm-tip">点选跳转</span>
+      </div>
+      <canvas id="minimap" width="440" height="294"></canvas>
+    </div>
+
+    <!-- 第一人称底部单行悬浮导览栏（shadcn Floating Toolbar） -->
+    <div id="tour-bar" hidden role="toolbar" aria-label="第一人称漫游导览控制">
+      <div class="tour-group">
+        <button id="tour-prev" class="tb-icon-btn" type="button" title="上一站" aria-label="上一站">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <select id="tour-select" name="tour-stop" class="ui-select tb-select" aria-label="选择导览站点"></select>
+        <button id="tour-next" class="tb-icon-btn" type="button" title="下一站" aria-label="下一站">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <span class="tb-divider" aria-hidden="true"></span>
+
+      <div class="tour-group">
+        <button id="tour-auto" class="tb-btn" type="button" title="自动巡游">
+          <svg class="ic ic-play" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          <svg class="ic ic-pause" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>
+          <span class="tb-auto-label">自动导览</span>
+        </button>
+        <button id="tour-photo-btn" class="tb-btn" type="button" title="实景照片对照">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          <span>实景</span>
+        </button>
+      </div>
+
+      <span class="tb-divider" aria-hidden="true"></span>
+
+      <button id="tour-exit" class="tb-btn tb-ghost" type="button" title="退出漫游 (Esc)">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        <span>退出</span>
+      </button>
+
+      <div class="tour-hint" aria-hidden="true">WASD 移动 · 拖拽视角 · 单击地面瞬移</div>
+    </div>
 
     <!-- 移动端虚拟摇杆 -->
     <div id="joy-pad" hidden><div id="joy-knob"></div></div>
