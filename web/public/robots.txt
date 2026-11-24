@@ -1,0 +1,8 @@
+# https://bdfz.leiping.dev/robots.txt
+User-agent: *
+Allow: /
+Allow: /og_image.jpg
+Allow: /bdfz.glb
+Allow: /scene.json
+
+Sitemap: https://bdfz.leiping.dev/sitemap.xml

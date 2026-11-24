@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://bdfz.leiping.dev/</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://bdfz.leiping.dev/og_image.jpg</image:loc>
+      <image:title>北大附中海口学校 · 三维校园鸟瞰</image:title>
+      <image:caption>北大附中海口学校高精度 3D 虚拟校园与数字孪生沉浸漫游系统</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://bdfz.leiping.dev/pkuhs_badge.png</image:loc>
+      <image:title>北京大学附属中学海口学校校徽</image:title>
+    </image:image>
+  </url>
+</urlset>

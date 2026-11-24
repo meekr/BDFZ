@@ -1,0 +1,12 @@
+# 北大附中海口学校三维数字孪生校园 (BDFZ Haikou School 3D Campus)
+
+> 北大附中海口学校（The Affiliated High School of Peking University Haikou School）高精度 3D 虚拟校园与沉浸漫游系统。
+
+- 线上体验: https://bdfz.leiping.dev/
+- 开源仓库: https://github.com/meekr/BDFZ
+- 核心技术: Three.js, WebGL, Draco 几何压缩, 程序化材质贴图, 碰撞导航网格
+- 核心功能: 
+  - 鸟瞰全景与第一人称实景漫游无缝切换
+  - 12 处核心室内外地标（校名石、星形庭院、400m田径场、图书馆、艺术展厅、50m室内游泳馆、双篮球馆、示范宿舍等）
+  - 2024 规划设计图纸高精度半透明叠加对照
+  - 完整真实实景照片定位对比

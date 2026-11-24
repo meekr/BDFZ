@@ -1,3 +1,16 @@
+
+/* ---------- 辅助功能与语义隐藏 (Accessibility & SEO) ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 /* ==========================================================================
    北大附中海口学校 · 三维校园 HUD（shadcn/ui 建筑浅色磨砂控件体系）
    ========================================================================== */
