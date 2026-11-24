@@ -134,7 +134,7 @@ def make_roof_seam():
 
 
 def make_school_stone():
-    """北入口校名景石 (2048x768)：细腻浅灰天然花岗岩纹理 + 充裕边距的深红书法字样“北京大学附属中学海口学校”。"""
+    """北入口校名景石 (2048x768)：细腻浅灰天然花岗岩纹理 + 官方“北京大学附属中学海口学校”书法字样。"""
     W, H = 2048, 768
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
     rng0 = np.random.default_rng(19)
@@ -148,29 +148,36 @@ def make_school_stone():
     g = np.clip(base + grain, 90, 232).astype(np.uint8)
     arr = np.stack([g, g, np.clip(g.astype(int) + 2, 0, 255).astype(np.uint8)], axis=-1)
     pil = Image.fromarray(arr, mode='RGB')
-    draw = ImageDraw.Draw(pil)
-    fp = find_cjk_font()
-    text = '北京大学附属中学海口学校'
-    # 自适应字号，确保文字总宽 <= 76% 石面宽度（左右留足自然石面，绝不压边裁切）
-    font_size = 132
-    font = ImageFont.truetype(fp, font_size) if fp else ImageFont.load_default()
-    if fp:
-        while font_size > 60:
-            font = ImageFont.truetype(fp, font_size)
-            bbox = draw.textbbox((0, 0), text, font=font)
-            if (bbox[2] - bbox[0]) <= int(W * 0.76):
-                break
-            font_size -= 4
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    tx = (W - tw) // 2 - bbox[0]
-    ty = int(H * 0.46) - th // 2 - bbox[1]
-    # 浅阴刻阴影 + 饱满深红校名大字
-    draw.text((tx + 3, ty + 3), text, font=font, fill=(72, 62, 62))
-    draw.text((tx, ty), text, font=font, fill=(148, 22, 22))
+
+    cal_path = os.path.join(ROOT, 'blender', 'textures', 'school_stone_calligraphy.png')
+    if os.path.exists(cal_path):
+        cal = Image.open(cal_path)
+        cw, ch = cal.size
+        tw = int(W * 0.75)
+        th = int(ch * (tw / cw))
+        cal_s = cal.resize((tw, th), Image.Resampling.LANCZOS)
+        c_arr = np.array(cal_s)
+        alpha = c_arr[:, :, 3].astype(np.float32) / 255.0
+        
+        crimson_rgb = (148, 22, 22)
+        shadow_rgb = (60, 52, 52)
+        t_arr = np.zeros((th, tw, 4), dtype=np.uint8)
+        for i in range(3): t_arr[:, :, i] = crimson_rgb[i]
+        t_arr[:, :, 3] = (alpha * 255).astype(np.uint8)
+        text_layer = Image.fromarray(t_arr, 'RGBA')
+        
+        s_arr = np.zeros((th, tw, 4), dtype=np.uint8)
+        for i in range(3): s_arr[:, :, i] = shadow_rgb[i]
+        s_arr[:, :, 3] = (alpha * 210).astype(np.uint8)
+        shadow_layer = Image.fromarray(s_arr, 'RGBA')
+        
+        tx = (W - tw) // 2
+        ty = int(H * 0.46) - th // 2
+        pil.paste(shadow_layer, (tx + 3, ty + 3), shadow_layer)
+        pil.paste(text_layer, (tx, ty), text_layer)
     p = os.path.join(OUT, 'school_stone.png')
     pil.save(p)
-    print('wrote', p, 'font_size=', font_size)
+    print('wrote', p, 'with authentic calligraphy')
 
 
 def make_bleacher_slogan():

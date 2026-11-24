@@ -1023,72 +1023,50 @@ body:has(#stats:not([hidden])) .floating-card {
 /* 3D 空间等轴测立方体线框 & 脉冲环 */
 .loader-scene {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cube-orbit {
+.badge-orbit {
   position: absolute;
-  inset: 2px;
+  inset: 0px;
   border-radius: 50%;
-  border: 1.5px dashed rgba(37, 99, 235, 0.35);
-  animation: loader-spin 12s linear infinite;
+  border: 1.5px dashed rgba(160, 26, 32, 0.38);
+  animation: loader-spin 16s linear infinite;
 }
 
-.cube-core {
+.badge-core {
   position: relative;
-  width: 44px;
-  height: 44px;
-  animation: loader-float 3.2s ease-in-out infinite alternate;
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  animation: loader-float 3.4s ease-in-out infinite alternate;
 }
 
-.cube-core .face {
+.badge-img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(138, 28, 28, 0.28));
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.badge-glow {
   position: absolute;
-  box-sizing: border-box;
-}
-
-/* 空间三维等轴测晶体表面 */
-.cube-core .face-top {
-  width: 32px;
-  height: 32px;
-  top: 0;
-  left: 6px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.85), rgba(56, 189, 248, 0.9));
-  transform: rotate(45deg) skew(-15deg, -15deg);
-  border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
-}
-
-.cube-core .face-left {
-  width: 22px;
-  height: 24px;
-  top: 22px;
-  left: 2px;
-  background: linear-gradient(180deg, rgba(30, 64, 175, 0.82), rgba(30, 58, 138, 0.9));
-  transform: skewY(30deg);
-  border-radius: 0 0 0 4px;
-}
-
-.cube-core .face-right {
-  width: 22px;
-  height: 24px;
-  top: 22px;
-  right: 2px;
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.75), rgba(37, 99, 235, 0.85));
-  transform: skewY(-30deg);
-  border-radius: 0 0 4px 0;
-}
-
-.cube-glow {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.38) 0%, rgba(37, 99, 235, 0) 70%);
-  filter: blur(8px);
-  animation: loader-pulse 2s ease-in-out infinite alternate;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 26, 32, 0.26) 0%, rgba(37, 99, 235, 0.08) 60%, transparent 80%);
+  filter: blur(10px);
+  animation: loader-pulse 2.4s ease-in-out infinite alternate;
+  z-index: 1;
 }
 
 @keyframes loader-spin {
