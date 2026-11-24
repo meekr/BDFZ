@@ -10,7 +10,7 @@
 
 **基于 Crossboundaries 官方图纸、实景摄影与卫星测绘高精度重建的三维校园数字孪生展示与第一人称内外漫游系统。**
 
-[在线体验 (Live Preview)](https://bdfz.leiping.dev) · [功能亮点](#-核心功能亮点) · [精选图集](#-精选场景与渲染图集) · [技术架构](#-技术架构与流水线) · [快速上手](#-快速上手) · [部署指南](#-生产部署)
+[在线体验 (Live Preview)](https://bdfz.leiping.dev) · [功能亮点](#-核心功能亮点) · [精选图集](#-精选场景与渲染图集) · [技术架构](#-技术架构与流水线) · [快速上手](#-快速上手)
 
 </div>
 
@@ -109,12 +109,9 @@ flowchart LR
         Engine --> UI["现代化 shadcn HUD (web/src/style.css)"]
     end
 
-    subgraph InfraDeploy ["3. 生产发布"]
-        UI --> ViteBuild["Vite 8.x 生产静态打包"]
-        ViteBuild --> Deploy["deploy-to-us.sh (rsync)"]
-        Deploy --> Cloudflare["Cloudflare CDN (HTTPS)"]
-        Cloudflare --> NginxStream["wh-us: Nginx Stream SNI + Let's Encrypt"]
-        NginxStream --> Live["https://bdfz.leiping.dev"]
+    subgraph BuildDist ["3. 生产产物"]
+        UI --> ViteBuild["Vite 8.x 生产打包 (npm run build)"]
+        ViteBuild --> Dist["web/dist/ 静态发布包 (支持任何静态服务器/CDN)"]
     end
 ```
 
@@ -130,8 +127,6 @@ BDFZ/
 ├── docs/                     # 历史各开发阶段记录 (P0 ~ P10)
 ├── renders/                  # Cycles 高清烘焙图集与展厅照片
 ├── tools/                    # 坐标系配准、卫星对齐与图纸纠偏工具
-├── scripts/                  # 自动化生产运维脚本
-│   └── deploy-to-us.sh       # US 生产节点一键打包与同步部署脚本
 └── web/                      # 前端三维展示工程 (Vite + Three.js)
     ├── index.html            # 现代化轻量语义化 HTML 与 shadcn HUD 结构
     ├── src/                  # 前端源码
@@ -168,22 +163,6 @@ npm run build
 
 产物将编译输出至 `web/dist/`，所有静态资源均已通过 Vite 进行 Hash 命名与 Draco 优化。
 
----
-
-## 🌐 生产部署
-
-本项目部署于 US 独立服务器节点，基于 Nginx Stream SNI 分流与 Let's Encrypt 证书体系，配合 Cloudflare CDN 实现全球高速分发。
-
-若具备服务器 SSH 权限，仅需在根目录下执行一行命令：
-
-```bash
-./scripts/deploy-to-us.sh
-```
-
-该脚本将自动执行：
-1. 本地执行 `npm run build` 产出优化包；
-2. 增量安全同步产物至远程服务器目录 `/var/www/bdfz.leiping.dev/`；
-3. 执行生产域名端点与 3D GLB 资产完整性健康检测。
 
 ---
 
