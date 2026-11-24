@@ -1,5 +1,5 @@
 """在卫星正射图上用标准尺寸球场线模板（倒角距离）拟合球场中心与朝向。"""
-import sys, json; sys.path.insert(0, '/Users/perrylei/repos/BDFZ_V3/tools')
+import sys, json; sys.path.insert(0, '/Users/perrylei/repos/BDFZ/tools')
 from worldgrid import *
 
 RES = 0.1
@@ -57,6 +57,6 @@ if __name__ == '__main__':
     for k, (kind, c, a) in jobs.items():
         out[k], v = fit(kind, c, a)
         tiles.append(cv2.resize(v, (300, 300)))
-    cv2.imwrite('/Users/perrylei/repos/BDFZ_V3/checks/p1_courts_fit.jpg', np.hstack(tiles))
-    json.dump(out, open('/Users/perrylei/repos/BDFZ_V3/data/_courts_fit.json', 'w'), indent=1)
+    cv2.imwrite('/Users/perrylei/repos/BDFZ/checks/p1_courts_fit.jpg', np.hstack(tiles))
+    json.dump(out, open('/Users/perrylei/repos/BDFZ/data/_courts_fit.json', 'w'), indent=1)
     print(json.dumps(out, ensure_ascii=False))

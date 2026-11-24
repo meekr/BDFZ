@@ -2,7 +2,7 @@
 /Applications/Blender.app/Contents/MacOS/Blender -b blender/bdfz.blend --python blender/build/export_glb.py
 每个节点写 extras：layer（building / landscape / site）与 bldg（建筑编号，供网页标注与信息卡）。"""
 import bpy, os
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 OUT = os.path.join(ROOT, 'web', 'public', 'bdfz.glb')
 LAYER = {'Bldg_': 'building', 'Landscape': 'landscape', 'Site': 'site', 'People': 'people'}
 

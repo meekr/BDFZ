@@ -3,12 +3,12 @@
 - 严格排除全部建筑外轮廓 3.4 m 缓冲（杜绝树冠穿出宿舍/幕墙）、市政道路带、4 片球场与星形庭院内部误种树
 - 24 段圆润有机曲面北入口校名景石 + 带落地玻璃窗框的北门房 + 石材纹理大台阶与折线台地
 - 海口低纬度日光与天空
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/landscape.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/landscape.py').read())
 """
 import bpy, bmesh, json, os, math, random
 from mathutils import Matrix, Vector
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 TR = json.load(open(os.path.join(ROOT, 'data', 'trees.json')))
 SITE = json.load(open(os.path.join(ROOT, 'data', 'site.json')))
 CY = json.load(open(os.path.join(ROOT, 'data', 'cloud_courtyard.json')))

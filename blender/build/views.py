@@ -2,7 +2,7 @@
 在 Blender 内执行：exec(open('.../blender/build/views.py').read())；然后 render_view('aerial', engine='CYCLES')。"""
 import bpy, json, os, math
 from mathutils import Vector
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 V = json.load(open(os.path.join(ROOT, 'data', 'views.json')))
 OUT = os.path.join(ROOT, 'renders')
 RES = (1920, 1080)

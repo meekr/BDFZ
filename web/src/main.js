@@ -1,3 +1,29 @@
+// ---------- 居中高质感三维加载器状态机 ----------
+const loaderOverlay = document.getElementById('loader-overlay');
+const loaderProgressBar = document.getElementById('loader-progress-bar');
+const loaderStatusText = document.getElementById('loader-status-text');
+const loaderPercent = document.getElementById('loader-percent');
+
+function updateLoader(pct, text) {
+  const clamped = Math.min(100, Math.max(0, pct));
+  if (loaderProgressBar) loaderProgressBar.style.width = `${clamped}%`;
+  if (loaderPercent) loaderPercent.textContent = `${Math.round(clamped)}%`;
+  if (loaderStatusText && text) loaderStatusText.textContent = text;
+}
+
+function dismissLoader() {
+  if (!loaderOverlay) return;
+  updateLoader(100, '载入就绪，正在呈现校园…');
+  setTimeout(() => {
+    loaderOverlay.classList.add('loaded');
+  }, 420);
+}
+
+const githubLink = document.getElementById('github-link');
+if (githubLink) {
+  githubLink.onclick = (e) => e.stopPropagation();
+}
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -125,7 +151,9 @@ function setPanelCollapsed(collapsed) {
 }
 if (mobile) setPanelCollapsed(true);
 panel.querySelector('header').onclick = () => setPanelCollapsed(!panel.classList.contains('collapsed'));
+updateLoader(12, '正在连接场景空间元数据…');
 const info = await (await fetch('./scene.json')).json();
+updateLoader(26, '元数据就绪，正在准备三维主模型…');
 const tourStops = info.tour?.stops || [];
 
 // ---------- 视点与双模状态 ----------
@@ -186,8 +214,16 @@ const chunkLoader = new ChunkLoader(scene, loader, (msg) => { statusEl.textConte
 
 const t0 = performance.now();
 const gltf = await loader.loadAsync('./bdfz.glb', (e) => {
-  if (e.total) statusEl.textContent = `加载模型… ${Math.round((e.loaded / e.total) * 100)}%`;
+  if (e.total) {
+    const ratio = e.loaded / e.total;
+    const pct = 26 + ratio * 62;
+    const mb = (e.loaded / 1024 / 1024).toFixed(1);
+    const totalMb = (e.total / 1024 / 1024).toFixed(1);
+    updateLoader(pct, `正在解算建筑空间与纹理贴图 (${mb}/${totalMb} MB)…`);
+    statusEl.textContent = `加载模型… ${Math.round(ratio * 100)}%`;
+  }
 });
+updateLoader(92, '正在解算 Draco 空间网格并烘焙材质…');
 const model = gltf.scene;
 const layers = { building: [], landscape: [], site: [], people: [] };
 const byBldg = {};
@@ -216,6 +252,8 @@ model.traverse((o) => {
 });
 scene.add(model);
 statusEl.textContent = `室外主包 ${(performance.now() - t0).toFixed(0)} ms`;
+updateLoader(98, '初始化光照系统与交互视点…');
+dismissLoader();
 
 const showPeople = params.get('people') !== '0';
 const peopleCb = document.querySelector('[data-layer="people"]');

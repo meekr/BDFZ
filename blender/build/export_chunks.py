@@ -9,7 +9,7 @@
 """
 import bpy, os
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 PUB = os.path.join(ROOT, 'web', 'public')
 os.makedirs(PUB, exist_ok=True)
 

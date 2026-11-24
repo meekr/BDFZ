@@ -4,7 +4,7 @@
 import bpy, bmesh, json, os, math
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 D = json.load(open(os.path.join(ROOT, 'data', 'bldg_sports.json')))
 COLL = 'Bldg_SportsArt'
 L = D['levels']

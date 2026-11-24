@@ -1,5 +1,5 @@
 """在卫星正射图上拟合标准 400 m 跑道（IAAF：直道 84.39 m，内突沿半径 36.5 m，道宽 1.22 m）。"""
-import sys, json; sys.path.insert(0, '/Users/perrylei/repos/BDFZ_V3/tools')
+import sys, json; sys.path.insert(0, '/Users/perrylei/repos/BDFZ/tools')
 from worldgrid import *
 
 RES = 0.1
@@ -60,12 +60,12 @@ def main(c0=(-177.3, -12.2), a0=19.7):
     for r in (rin, rin + wout):
         for p in to_px(stadium(r) @ Rm.T + [cx, cy], RES, ext).astype(int):
             cv2.circle(v, tuple(p), 2, (255, 255, 0), -1)
-    cv2.imwrite('/Users/perrylei/repos/BDFZ_V3/checks/p1_track_fit.jpg', cv2.resize(v, None, fx=0.35, fy=0.35, interpolation=cv2.INTER_AREA))
+    cv2.imwrite('/Users/perrylei/repos/BDFZ/checks/p1_track_fit.jpg', cv2.resize(v, None, fx=0.35, fy=0.35, interpolation=cv2.INTER_AREA))
     out = dict(center=[round(float(cx), 2), round(float(cy), 2)], long_axis_deg_west_of_north=round(float(ang), 2),
                red_inner_radius=round(float(rin), 2), red_band_width=round(float(wout), 2),
                outer_bbox=[round(float(STRAIGHT + 2 * (rin + wout)), 2), round(float(2 * (rin + wout)), 2)],
                mean_edge_dist_m=round(float(best[0]), 3))
-    json.dump(out, open('/Users/perrylei/repos/BDFZ_V3/data/_track_fit.json', 'w'), indent=1)
+    json.dump(out, open('/Users/perrylei/repos/BDFZ/data/_track_fit.json', 'w'), indent=1)
     print(out)
 
 

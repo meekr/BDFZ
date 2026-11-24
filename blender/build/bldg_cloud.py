@@ -2,12 +2,12 @@
 石材纹理庭院地坪、退进式开敞外廊与 3D 廊柱/栏杆、直立锁边金属坡屋面）。
 数据：data/bldg_cloud.json、bldg_cloud_p3.json、bldg_cloud_roof.json、cloud_courtyard.json。
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/bldg_cloud.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/bldg_cloud.py').read())
 """
 import bpy, bmesh, json, os, math
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 D = json.load(open(os.path.join(ROOT, 'data', 'bldg_cloud.json')))
 P3 = json.load(open(os.path.join(ROOT, 'data', 'bldg_cloud_p3.json')))
 SITE = json.load(open(os.path.join(ROOT, 'data', 'site.json')))

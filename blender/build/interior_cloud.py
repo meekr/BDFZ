@@ -4,12 +4,12 @@
 3. 学术中心 3F 开放社交长廊与北翼 6 间示范教室（依据 05_cloud_3f.jpg，Z=12.5..16.2 m）：
    常规教室×2、圆桌研讨室×2、理科/创客实验室×1、教师办公室×1 + 走廊储物柜与卡座
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/interior_cloud.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/interior_cloud.py').read())
 """
 import bpy, bmesh, math, os
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 TEX = os.path.join(ROOT, 'blender', 'textures')
 COLL = 'Interior_Cloud'
 

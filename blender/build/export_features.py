@@ -1,6 +1,6 @@
 """导出模型特征边（边界边 + 折角 > 30° 的边）上的采样点，供照片相机匹配用。→ data/_feature_pts.npz"""
 import bpy, bmesh, math, numpy as np
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 GROUPS = {
     'cloud_roof': ['Bldg_Cloud_Slab_roof'],
     'cloud_slab': ['Bldg_Cloud_Slab_f1', 'Bldg_Cloud_Slab_f2', 'Bldg_Cloud_Slab_f3'],

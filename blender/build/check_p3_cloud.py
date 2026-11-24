@@ -10,5 +10,5 @@ for k, (s, n) in lv.items():
                   err=round(max(abs(tn - n), abs(ts - s)), 3))
 cols = [o for o in bpy.data.objects if o.name.startswith('Bldg_Cloud_Column_')]
 res['columns'] = len(cols)
-json.dump(res, open('/Users/perrylei/repos/BDFZ_V3/data/_p3_cloud_gate.json', 'w'), indent=1)
+json.dump(res, open('/Users/perrylei/repos/BDFZ/data/_p3_cloud_gate.json', 'w'), indent=1)
 print(json.dumps(res))

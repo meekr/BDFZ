@@ -2,7 +2,7 @@
 在 Blender 内执行：exec(open('.../blender/build/ref_cameras.py').read())；叠图由 tools/p6_overlay.py 完成。"""
 import bpy, json, math, os
 from mathutils import Matrix, Vector
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 OUT = os.path.join(ROOT, 'checks', '_renders')
 D = json.load(open(os.path.join(ROOT, 'data', 'cameras.json')))
 W_WORK = D['W_WORK']

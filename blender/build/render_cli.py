@@ -10,7 +10,7 @@ prefs = bpy.context.preferences.addons['cycles'].preferences
 prefs.compute_device_type = 'METAL'; prefs.get_devices()
 for d in prefs.devices:
     d.use = d.type != 'CPU'
-exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/views.py').read())
+exec(open('/Users/perrylei/repos/BDFZ/blender/build/views.py').read())
 ids = [v['id'] for v in V['views']] if vid == 'all' else vid.split(',')
 for i in ids:
     out = os.path.join(out_dir, f'{i}.png') if out_dir else None

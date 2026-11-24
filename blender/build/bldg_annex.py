@@ -1,7 +1,7 @@
 """P2–P10 学术中心南侧低层附楼（无 N-gon 干净三角化 + 清理旧 Mesh 杜绝 .001 重复后缀）。数据：data/bldg_annex.json。"""
 import bpy, bmesh, json, os, math
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 D = json.load(open(os.path.join(ROOT, 'data', 'bldg_annex.json')))
 COLL = 'Bldg_Cloud'
 

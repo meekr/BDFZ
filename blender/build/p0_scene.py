@@ -5,7 +5,7 @@
 """
 import bpy, json, os
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 FR = json.load(open(os.path.join(ROOT, 'data', 'frames.json')))
 
 REF_ITEMS = [

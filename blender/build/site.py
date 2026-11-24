@@ -2,12 +2,12 @@
 3D 足球门、跳远沙坑、升旗台、高杆照明灯塔）、网球场与篮球场（纯 3D 矢量 FIBA/ITF 白线、3D 球网与篮架、围网、休憩亭）。
 数据来自 data/site.json。
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/site.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/site.py').read())
 """
 import bpy, bmesh, json, math, os
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 S = json.load(open(os.path.join(ROOT, 'data', 'site.json')))
 COLL = 'Site'
 

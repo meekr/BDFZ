@@ -5,12 +5,12 @@
 - 干湿分离公共卫浴间（长洗手台镜面 + 4 间独立淋浴/厕位隔间）
 - 半开放式庭院外廊衔接室外折跑钢楼梯
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/interior_dorm.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/interior_dorm.py').read())
 """
 import bpy, bmesh, math, os
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 TEX = os.path.join(ROOT, 'blender', 'textures')
 COLL = 'Interior_Dorm'
 

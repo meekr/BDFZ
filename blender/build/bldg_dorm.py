@@ -5,12 +5,12 @@
 - 西北连接体直立锁边金属坡屋面与西侧入口雨棚/台阶
 数据：data/bldg_dorm.json。
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/bldg_dorm.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/bldg_dorm.py').read())
 """
 import bpy, bmesh, json, os, math
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 D = json.load(open(os.path.join(ROOT, 'data', 'bldg_dorm.json')))
 SITE = json.load(open(os.path.join(ROOT, 'data', 'site.json')))
 COLL = 'Bldg_Dorm'

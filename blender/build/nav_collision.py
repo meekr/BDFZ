@@ -5,7 +5,7 @@
 import bpy, bmesh, json, math, os
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 SITE = json.load(open(os.path.join(ROOT, 'data', 'site.json')))
 CY = json.load(open(os.path.join(ROOT, 'data', 'cloud_courtyard.json')))
 RAMPS = json.load(open(os.path.join(ROOT, 'data', 'nav_ramps.json')))

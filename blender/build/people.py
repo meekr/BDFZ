@@ -6,12 +6,12 @@
 - 坐姿原型臀部基准面严格锚定 Z=0.0，完美贴合看台、星形庭院大台阶与宿舍长凳
 数据：data/people.json，色板：blender/textures/people_palette.png（16 色格）。
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/people.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/people.py').read())
 """
 import bpy, bmesh, json, os, math, random
 from mathutils import Vector, Matrix, Euler
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 D = json.load(open(os.path.join(ROOT, 'data', 'people.json')))
 COLL = 'People'
 NUM_SWATCHES = 16

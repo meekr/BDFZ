@@ -4,12 +4,12 @@
 3. 艺术中心大剧场（official_27.jpg）：12 排阶梯坡地 + 216 张实例化暗红绒面礼堂座椅、原木吸音条纹侧墙、深木色舞台与讲台、三联发光大屏、舞台面光灯桥
 4. 首层公共大厅（衔接三大场馆与西南柱廊主入口）
 
-在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ_V3/blender/build/interior_sports.py').read())
+在 Blender 中运行：exec(open('/Users/perrylei/repos/BDFZ/blender/build/interior_sports.py').read())
 """
 import bpy, bmesh, math, os
 from mathutils import Vector, Matrix
 
-ROOT = '/Users/perrylei/repos/BDFZ_V3'
+ROOT = '/Users/perrylei/repos/BDFZ'
 TEX = os.path.join(ROOT, 'blender', 'textures')
 COLL = 'Interior_Sports'
 
