@@ -33,6 +33,8 @@ def mat(name):
     if m is None:
         m = bpy.data.materials.new(name)
         m.use_nodes = True
+    if name == 'M_Paving' and m.node_tree and any(n.type == 'TEX_IMAGE' for n in m.node_tree.nodes):
+        return m
     if name in MATS:
         r, g, b, rough = MATS[name]
         bsdf = m.node_tree.nodes.get('Principled BSDF')
@@ -125,7 +127,7 @@ def prism(name, outer, holes, z0, z1, material, c, keep=None, top_mat=None):
         side, v = keep
         bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(v, 0, 0),
                                plane_no=(1, 0, 0), clear_inner=(side == 'x>'), clear_outer=(side == 'x<'))
-    bmesh.ops.dissolve_limit(bm, angle_limit=0.0005, verts=bm.verts[:], edges=bm.edges[:], delimit=set())
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
     r = bmesh.ops.extrude_face_region(bm, geom=bm.faces[:])
     top = {v for v in r['geom'] if isinstance(v, bmesh.types.BMVert)}
     for v in bm.verts:

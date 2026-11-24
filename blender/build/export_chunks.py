@@ -66,7 +66,7 @@ def export_subset(filename, coll_map):
         export_yup=True, export_gpu_instances=True, export_cameras=False, export_lights=False,
         export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=6,
         export_draco_position_quantization=14, export_draco_normal_quantization=10, export_draco_texcoord_quantization=12,
-        export_image_format='WEBP', export_materials='EXPORT'
+        export_image_format='WEBP', export_image_quality=92, export_materials='EXPORT'
     )
     mb = os.path.getsize(out_path) / 1e6
     print(f'CHUNK {filename:22s}: {len(keep):4d} objs | {mb:.3f} MB')

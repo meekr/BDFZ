@@ -3,147 +3,147 @@
  "count": 133,
  "people": [
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -193.63,
    "y": -2.06,
    "yaw": 195,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -176.83,
    "y": 10.34,
    "yaw": 210,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -182.05,
    "y": -10.66,
    "yaw": 180,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -161.05,
    "y": -15.87,
    "yaw": 215,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -189.82,
    "y": -30.44,
    "yaw": 160,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -166.0,
    "y": -34.65,
    "yaw": 200,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -194.73,
    "y": 18.79,
    "yaw": 195,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -193.98,
    "y": 34.47,
    "yaw": 200,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -188.51,
    "y": -4.48,
    "yaw": 25,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -172.24,
    "y": 3.48,
    "yaw": 365,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -174.37,
    "y": -14.28,
    "yaw": 35,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -184.03,
    "y": -34.74,
    "yaw": 40,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -155.12,
    "y": -26.49,
    "yaw": 360,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -170.16,
    "y": -46.76,
    "yaw": 30,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -179.53,
    "y": 17.87,
    "yaw": 370,
    "zone": "football"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -159.88,
    "y": -60.61,
    "yaw": 20,
    "zone": "football"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -222.55,
    "y": -2.87,
    "yaw": 200,
    "zone": "track"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -220.4,
    "y": -12.72,
    "yaw": 200,
    "zone": "track"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -208.03,
    "y": -43.35,
    "yaw": 200,
    "zone": "track"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Run",
    "x": -142.65,
    "y": 9.85,
    "yaw": 20,
    "zone": "track"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Run",
    "x": -136.46,
    "y": -3.87,
    "yaw": 20,
@@ -164,7 +164,7 @@
    "zone": "track"
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -194.08,
    "y": -104.83,
    "yaw": -70,
@@ -172,7 +172,7 @@
    "z": 4.2
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -194.57,
    "y": -103.5,
    "yaw": -70,
@@ -180,7 +180,7 @@
    "z": 4.2
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -197.11,
    "y": -90.83,
    "yaw": -70,
@@ -188,7 +188,7 @@
    "z": 3.0
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -198.09,
    "y": -88.17,
    "yaw": -70,
@@ -196,7 +196,7 @@
    "z": 3.0
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -197.88,
    "y": -85.83,
    "yaw": -70,
@@ -204,7 +204,7 @@
    "z": 2.4
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -204.91,
    "y": -72.56,
    "yaw": -70,
@@ -212,7 +212,7 @@
    "z": 3.6
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -205.89,
    "y": -69.9,
    "yaw": -70,
@@ -220,7 +220,7 @@
    "z": 3.6
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -207.73,
    "y": -56.23,
    "yaw": -70,
@@ -228,119 +228,121 @@
    "z": 1.8
   },
   {
-   "kind": "Sport_Blue",
-   "x": 176.33,
-   "y": 37.88,
+   "kind": "Sport_Blue_Play",
+   "x": 178.53,
+   "y": 38.28,
    "yaw": 121,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Red",
-   "x": 171.43,
-   "y": 39.43,
+   "kind": "Sport_Red_Play",
+   "x": 173.63,
+   "y": 39.83,
    "yaw": 86,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Blue",
-   "x": 173.38,
-   "y": 42.38,
+   "kind": "Sport_Blue_Play",
+   "x": 175.58,
+   "y": 42.78,
    "yaw": 211,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Red",
-   "x": 168.76,
-   "y": 43.99,
+   "kind": "Sport_Red_Play",
+   "x": 170.96,
+   "y": 44.39,
    "yaw": -59,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Blue",
-   "x": 173.65,
-   "y": 48.56,
+   "kind": "Sport_Blue_Play",
+   "x": 175.85,
+   "y": 48.96,
    "yaw": 181,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Red",
-   "x": 169.52,
-   "y": 51.29,
+   "kind": "Sport_Red_Play",
+   "x": 171.72,
+   "y": 51.69,
    "yaw": 11,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Blue",
-   "x": 170.4,
-   "y": 54.53,
+   "kind": "Sport_Blue_Play",
+   "x": 172.6,
+   "y": 54.93,
    "yaw": -69,
    "zone": "basket_NE"
   },
   {
-   "kind": "Sport_Red",
-   "x": 167.41,
-   "y": 55.66,
+   "kind": "Sport_Red_Play",
+   "x": 169.61,
+   "y": 56.06,
    "yaw": 276,
    "zone": "basket_NE"
   },
   {
-   "kind": "Student_Stand",
-   "x": 167.82,
-   "y": 33.59,
+   "kind": "Student_Chat",
+   "x": 170.02,
+   "y": 33.99,
    "yaw": 301,
    "zone": "basket_NE"
   },
   {
-   "kind": "Student_Stand",
-   "x": 167.26,
-   "y": 34.81,
+   "kind": "Student_Stand_F",
+   "x": 169.46,
+   "y": 35.21,
    "yaw": 321,
    "zone": "basket_NE"
   },
   {
-   "kind": "Student_Sit",
-   "x": 161.24,
-   "y": 48.89,
+   "kind": "Student_Sit_F",
+   "x": 163.44,
+   "y": 49.29,
    "yaw": 11,
-   "zone": "basket_NE"
+   "zone": "basket_NE",
+   "z": 0.28
   },
   {
-   "kind": "Student_Sit",
-   "x": 163.23,
-   "y": 39.09,
+   "kind": "Student_Sit_M",
+   "x": 165.43,
+   "y": 39.49,
    "yaw": 11,
-   "zone": "basket_NE"
+   "zone": "basket_NE",
+   "z": 0.28
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -267.69,
    "y": 13.34,
    "yaw": 140,
    "zone": "basket_W"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Play",
    "x": -265.43,
    "y": 17.36,
    "yaw": 270,
    "zone": "basket_W"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -271.89,
    "y": 21.92,
    "yaw": 70,
    "zone": "basket_W"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Play",
    "x": -271.14,
    "y": 28.59,
    "yaw": 280,
    "zone": "basket_W"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -274.46,
    "y": 29.5,
    "yaw": -40,
@@ -354,63 +356,63 @@
    "zone": "basket_W"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -132.48,
    "y": 39.93,
    "yaw": 110,
    "zone": "tennis_N"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -137.15,
    "y": 39.29,
    "yaw": 115,
    "zone": "tennis_N"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Play",
    "x": -143.12,
    "y": 56.27,
    "yaw": 290,
    "zone": "tennis_N"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Play",
    "x": -138.45,
    "y": 56.91,
    "yaw": 285,
    "zone": "tennis_N"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -122.14,
    "y": 11.35,
    "yaw": 110,
    "zone": "tennis_S"
   },
   {
-   "kind": "Sport_Blue",
+   "kind": "Sport_Blue_Play",
    "x": -126.8,
    "y": 10.7,
    "yaw": 115,
    "zone": "tennis_S"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Play",
    "x": -132.86,
    "y": 27.65,
    "yaw": 290,
    "zone": "tennis_S"
   },
   {
-   "kind": "Sport_Red",
+   "kind": "Sport_Red_Play",
    "x": -128.2,
    "y": 28.3,
    "yaw": 285,
    "zone": "tennis_S"
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": -123.55,
    "y": 40.52,
    "yaw": 20,
@@ -426,7 +428,7 @@
    "z": 0.36
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -16.0,
    "y": -45.0,
    "yaw": 35,
@@ -434,7 +436,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -14.2,
    "y": -46.2,
    "yaw": 42,
@@ -442,7 +444,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_F",
    "x": -6.0,
    "y": -51.0,
    "yaw": -120,
@@ -450,7 +452,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_M",
    "x": -4.6,
    "y": -50.2,
    "yaw": 65,
@@ -466,7 +468,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 4.5,
    "y": -53.5,
    "yaw": 145,
@@ -474,7 +476,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 5.8,
    "y": -54.8,
    "yaw": 150,
@@ -482,7 +484,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": -28.0,
    "y": -56.0,
    "yaw": -20,
@@ -490,7 +492,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_F",
    "x": -26.8,
    "y": -55.4,
    "yaw": 160,
@@ -506,7 +508,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -8.0,
    "y": -33.0,
    "yaw": 110,
@@ -514,7 +516,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -6.5,
    "y": -34.2,
    "yaw": 105,
@@ -522,7 +524,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_M",
    "x": 14.0,
    "y": -68.0,
    "yaw": 85,
@@ -530,7 +532,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": 15.4,
    "y": -67.5,
    "yaw": -95,
@@ -538,7 +540,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -31.0,
    "y": -76.0,
    "yaw": 50,
@@ -546,7 +548,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -29.5,
    "y": -77.2,
    "yaw": 55,
@@ -554,7 +556,7 @@
    "z": 0.04
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -7.97,
    "y": -57.9,
    "yaw": 0,
@@ -562,7 +564,7 @@
    "z": 0.9
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -5.61,
    "y": -57.9,
    "yaw": 0,
@@ -570,7 +572,7 @@
    "z": 0.9
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -11.37,
    "y": -61.52,
    "yaw": 0,
@@ -578,7 +580,7 @@
    "z": 2.02
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -10.08,
    "y": -61.52,
    "yaw": 0,
@@ -586,7 +588,7 @@
    "z": 2.02
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": -2.94,
    "y": -64.42,
    "yaw": 0,
@@ -594,7 +596,7 @@
    "z": 2.93
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": -1.04,
    "y": -64.42,
    "yaw": 0,
@@ -602,7 +604,7 @@
    "z": 2.93
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -4.64,
    "y": -60.08,
    "yaw": 180,
@@ -610,7 +612,7 @@
    "z": 1.57
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -9.55,
    "y": -65.88,
    "yaw": 180,
@@ -618,7 +620,7 @@
    "z": 3.38
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_M",
    "x": -10.0,
    "y": -73.0,
    "yaw": 15,
@@ -626,7 +628,7 @@
    "z": 4.5
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": -8.6,
    "y": -72.8,
    "yaw": -160,
@@ -642,7 +644,7 @@
    "z": 4.5
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -11.5,
    "y": -91.0,
    "yaw": 60,
@@ -650,7 +652,7 @@
    "z": 4.5
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": 21.5,
    "y": -48.0,
    "yaw": 175,
@@ -658,7 +660,7 @@
    "z": 3.8
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_F",
    "x": 22.2,
    "y": -49.5,
    "yaw": 160,
@@ -666,7 +668,7 @@
    "z": 3.8
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_M",
    "x": -16.0,
    "y": -22.8,
    "yaw": 180,
@@ -674,7 +676,7 @@
    "z": 8.0
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": -14.8,
    "y": -23.2,
    "yaw": 180,
@@ -682,7 +684,7 @@
    "z": 8.0
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 8.0,
    "y": -20.8,
    "yaw": -120,
@@ -690,7 +692,7 @@
    "z": 8.0
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Stand_M",
    "x": -8.0,
    "y": -26.8,
    "yaw": 180,
@@ -698,7 +700,7 @@
    "z": 12.5
   },
   {
-   "kind": "Student_Stand",
+   "kind": "Student_Chat",
    "x": -6.8,
    "y": -27.0,
    "yaw": 180,
@@ -714,34 +716,34 @@
    "z": 12.5
   },
   {
-   "kind": "Student_Stand",
-   "x": -19.0,
-   "y": 59.5,
-   "yaw": 0,
+   "kind": "Student_Stand_M",
+   "x": -22.8,
+   "y": 60.2,
+   "yaw": -25,
    "zone": "north_plaza",
    "z": -5.95
   },
   {
-   "kind": "Student_Stand",
-   "x": -17.5,
-   "y": 59.8,
-   "yaw": 10,
+   "kind": "Student_Chat",
+   "x": -21.2,
+   "y": 61.5,
+   "yaw": 145,
    "zone": "north_plaza",
    "z": -5.95
   },
   {
-   "kind": "Student_Stand",
-   "x": -16.0,
-   "y": 59.8,
-   "yaw": 0,
+   "kind": "Student_Stand_F",
+   "x": -9.5,
+   "y": 60.4,
+   "yaw": -155,
    "zone": "north_plaza",
    "z": -5.95
   },
   {
-   "kind": "Student_Stand",
-   "x": -14.5,
-   "y": 59.6,
-   "yaw": -10,
+   "kind": "Student_Stand_M",
+   "x": -8.2,
+   "y": 61.8,
+   "yaw": 35,
    "zone": "north_plaza",
    "z": -5.95
   },
@@ -754,15 +756,15 @@
    "z": -5.95
   },
   {
-   "kind": "Student_Stand",
-   "x": -16.2,
-   "y": 63.5,
-   "yaw": 180,
+   "kind": "Student_Stand_F",
+   "x": -19.8,
+   "y": 66.2,
+   "yaw": -70,
    "zone": "north_plaza",
    "z": -5.95
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -24.0,
    "y": 44.0,
    "yaw": 175,
@@ -770,7 +772,7 @@
    "z": -5.95
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -22.5,
    "y": 45.2,
    "yaw": 170,
@@ -778,7 +780,7 @@
    "z": -5.95
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -8.0,
    "y": 42.0,
    "yaw": -5,
@@ -794,7 +796,7 @@
    "z": -5.95
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -28.0,
    "y": 88.0,
    "yaw": 180,
@@ -802,7 +804,7 @@
    "z": -5.95
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -26.4,
    "y": 89.0,
    "yaw": 175,
@@ -810,23 +812,23 @@
    "z": -5.95
   },
   {
-   "kind": "Student_Stand",
-   "x": -40.0,
-   "y": 92.0,
-   "yaw": 45,
+   "kind": "Student_Stand_M",
+   "x": -12.2,
+   "y": 65.8,
+   "yaw": -110,
    "zone": "north_plaza",
    "z": -5.95
   },
   {
-   "kind": "Student_Stand",
-   "x": -38.8,
-   "y": 92.6,
-   "yaw": -135,
+   "kind": "Student_Chat",
+   "x": -25.0,
+   "y": 58.0,
+   "yaw": 15,
    "zone": "north_plaza",
    "z": -5.95
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -20.0,
    "y": 29.5,
    "yaw": 180,
@@ -834,7 +836,7 @@
    "z": -4.5
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": -18.5,
    "y": 28.2,
    "yaw": 180,
@@ -842,7 +844,7 @@
    "z": -4.2
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": -12.0,
    "y": 20.4,
    "yaw": 0,
@@ -858,7 +860,7 @@
    "z": -1.68
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 170.5,
    "y": -124.5,
    "yaw": 15,
@@ -866,7 +868,7 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 172.2,
    "y": -120.7,
    "yaw": -165,
@@ -874,23 +876,23 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": 164.9,
    "y": -126.7,
    "yaw": -90,
    "zone": "dorm_court_0",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": 177.7,
    "y": -118.3,
    "yaw": 90,
    "zone": "dorm_court_0",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 161.9,
    "y": -74.1,
    "yaw": 15,
@@ -898,7 +900,7 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 163.6,
    "y": -70.3,
    "yaw": -165,
@@ -906,23 +908,23 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": 156.3,
    "y": -76.3,
    "yaw": -90,
    "zone": "dorm_court_1",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": 169.1,
    "y": -67.9,
    "yaw": 90,
    "zone": "dorm_court_1",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 138.3,
    "y": -24.4,
    "yaw": 15,
@@ -930,7 +932,7 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 140.0,
    "y": -20.6,
    "yaw": -165,
@@ -938,23 +940,23 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": 132.7,
    "y": -26.6,
    "yaw": -90,
    "zone": "dorm_court_2",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": 145.5,
    "y": -18.2,
    "yaw": 90,
    "zone": "dorm_court_2",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 126.8,
    "y": 18.4,
    "yaw": 15,
@@ -962,7 +964,7 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 128.5,
    "y": 22.2,
    "yaw": -165,
@@ -970,23 +972,23 @@
    "z": -0.09
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_F",
    "x": 121.2,
    "y": 16.2,
    "yaw": -90,
    "zone": "dorm_court_3",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Sit",
+   "kind": "Student_Sit_M",
    "x": 134.0,
    "y": 24.6,
    "yaw": 90,
    "zone": "dorm_court_3",
-   "z": 0.24
+   "z": 0.26
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 194.0,
    "y": -122.0,
    "yaw": -90,
@@ -994,7 +996,7 @@
    "z": -0.2
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 195.2,
    "y": -121.0,
    "yaw": -90,
@@ -1002,7 +1004,7 @@
    "z": -0.2
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_F",
    "x": 187.5,
    "y": -72.0,
    "yaw": -90,
@@ -1010,7 +1012,7 @@
    "z": -0.2
   },
   {
-   "kind": "Student_Walk",
+   "kind": "Student_Walk_M",
    "x": 188.6,
    "y": -71.2,
    "yaw": -90,

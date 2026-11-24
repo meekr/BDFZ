@@ -170,7 +170,7 @@ def spawn(c, name, me, loc, rot_deg=0.0):
 
 def build_library(c, protos, lm):
     """1. 星形庭院西南露台下图书馆（Z=0.04..4.15 m，x in [-40, -4], y in [-98, -73]）。"""
-    z0, z1 = 0.06, 4.15
+    z0, z1 = 0.10, 4.15
     # 原木地板
     bm_f = bmesh.new(); uvl_f = bm_f.loops.layers.uv.new('UVMap')
     vs = [bm_f.verts.new(p) for p in ((-40.0, -98.0, z0), (-4.0, -98.0, z0), (-4.0, -73.0, z0), (-40.0, -73.0, z0))]
@@ -220,21 +220,65 @@ def build_library(c, protos, lm):
 
 
 def build_art_gallery(c, lm):
-    """2. 星形庭院西侧艺术馆展厅（Z=0.06..3.05 m，x in [-38, -28], y in [-58, -42]）。"""
-    z0, z1 = 0.06, 3.05
+    """2. 星形庭院西侧艺术馆展厅（严格内嵌于 west_gallery_volume 梯形体块内部，封闭西南斜墙杜绝室外绿草坡穿模！）。"""
+    z0, z1 = 0.10, 2.68
+    # 严格内缩于 west_gallery_volume polygon [[-38.5,-42],[-31,-42],[-27.5,-54.5],[-37.5,-59]]
+    trap = [(-38.0, -42.4), (-31.4, -42.4), (-28.1, -54.2), (-37.1, -58.3)]
     bm = bmesh.new(); uvl = bm.loops.layers.uv.new('UVMap')
-    add_uv_box(bm, uvl, 1, (-37.5, -55.0, z0 - 0.04), (-28.0, -42.5, z0))
-    add_uv_box(bm, uvl, 0, (-37.5, -55.0, z1 - 0.1), (-28.0, -42.5, z1))
-    add_uv_box(bm, uvl, 0, (-37.5, -55.0, z0), (-37.1, -42.5, z1))  # 西主展墙
-    # 4 幅大幅挂墙艺术画框（彩色抽象画芯 + 暗灰画框）
-    pal = (12, 11, 5, 13)
-    for k, yi in enumerate((-53.0, -50.2, -47.4, -44.6)):
-        add_uv_box(bm, uvl, 6, (-37.58, yi - 1.15, z0 + 1.1), (-37.48, yi + 1.15, z0 + 2.55))
-        add_uv_box(bm, uvl, pal[k], (-37.50, yi - 1.05, z0 + 1.2), (-37.44, yi + 1.05, z0 + 2.45))
-    # 3 座中央白色雕塑展台 + 几何艺术装置
+
+    def add_poly_slab(poly, za, zb, sw):
+        u = (sw + 0.5) / 16.0
+        vb = [bm.verts.new((x, y, za)) for x, y in poly]
+        vt = [bm.verts.new((x, y, zb)) for x, y in poly]
+        fs = [bm.faces.new(list(reversed(vb))), bm.faces.new(vt)]
+        n = len(poly)
+        for i in range(n):
+            j = (i + 1) % n
+            fs.append(bm.faces.new((vb[i], vb[j], vt[j], vt[i])))
+        for f in fs:
+            for lp in f.loops:
+                lp[uvl].uv = (u, 0.5)
+
+    def add_wall(a, b, thick, za, zb, sw):
+        va, vb = Vector((a[0], a[1], 0)), Vector((b[0], b[1], 0))
+        d = (vb - va).normalized()
+        n = Vector((-d.y, d.x, 0)) * (thick * 0.5)
+        poly = [(va.x - n.x, va.y - n.y), (vb.x - n.x, vb.y - n.y), (vb.x + n.x, vb.y + n.y), (va.x + n.x, va.y + n.y)]
+        add_poly_slab(poly, za, zb, sw)
+
+    # 洁净浅灰展厅地面 + 白色吸音吊顶
+    add_poly_slab(trap, z0 - 0.04, z0, 1)
+    add_poly_slab(trap, z1 - 0.08, z1, 0)
+    # 封闭北墙 (0->1)、南斜墙 (2->3，彻底遮蔽外部绿草坡!)、西主展墙 (3->0)
+    add_wall(trap[0], trap[1], 0.30, z0, z1, 0)
+    add_wall(trap[2], trap[3], 0.35, z0, z1, 0)
+    add_wall(trap[3], trap[0], 0.35, z0, z1, 0)
+
+    # 西主展墙 4 幅精致双层画框艺术画（外暗框 + 留白卡纸 + 双色现代几何构成画芯）
+    pal = ((12, 5), (11, 10), (5, 13), (13, 12))
+    for k, yi in enumerate((-54.2, -51.1, -48.0, -44.9)):
+        # 按西墙斜线插值 X 贴紧墙面内侧
+        t = (yi - (-58.3)) / ((-42.4) - (-58.3))
+        wx = -37.1 + (-38.0 - (-37.1)) * t + 0.22
+        add_uv_box(bm, uvl, 6, (wx, yi - 1.12, z0 + 0.98), (wx + 0.06, yi + 1.12, z0 + 2.34))
+        add_uv_box(bm, uvl, 0, (wx + 0.04, yi - 1.04, z0 + 1.06), (wx + 0.09, yi + 1.04, z0 + 2.26))
+        add_uv_box(bm, uvl, pal[k][0], (wx + 0.08, yi - 0.90, z0 + 1.18), (wx + 0.11, yi + 0.90, z0 + 2.14))
+        add_uv_box(bm, uvl, pal[k][1], (wx + 0.10, yi - 0.45, z0 + 1.38), (wx + 0.13, yi + 0.55, z0 + 1.92))
+
+    # 3 座中央白色雕塑展台 + 优雅圆润艺术雕塑（球体/环柱组合替代单调方块）
+    u_pal = [(sw + 0.5) / 16.0 for sw in (11, 12, 13)]
     for k, yi in enumerate((-52.5, -49.0, -45.5)):
-        add_uv_box(bm, uvl, 0, (-33.5, yi - 0.55, z0), (-32.4, yi + 0.55, z0 + 1.05))
-        add_uv_box(bm, uvl, pal[(k + 1) % 4], (-33.25, yi - 0.30, z0 + 1.05), (-32.65, yi + 0.30, z0 + 1.75))
+        add_uv_box(bm, uvl, 0, (-34.2, yi - 0.48, z0), (-33.2, yi + 0.48, z0 + 0.96))
+        add_uv_box(bm, uvl, 6, (-34.24, yi - 0.52, z0), (-33.16, yi + 0.52, z0 + 0.06))
+        res = bmesh.ops.create_icosphere(bm, subdivisions=2, radius=0.30,
+                                         matrix=Matrix.Translation((-33.7, yi, z0 + 1.30)) @ Matrix.Diagonal((1.0, 0.85, 1.25, 1.0)))
+        vset = set(res['verts'])
+        for f in bm.faces:
+            if all(v in vset for v in f.verts):
+                f.smooth = True
+                for lp in f.loops:
+                    lp[uvl].uv = (u_pal[k], 0.5)
+
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new('Int_Cloud_ArtGallery'); bm.to_mesh(me); bm.free()
     me.materials.append(atlas_mat())
@@ -242,7 +286,7 @@ def build_art_gallery(c, lm):
 
     if lm:
         for k, yi in enumerate((-52.5, -49.0, -45.5)):
-            spawn(c, f'Int_Cloud_ArtLamp_{k}', lm, (-33.0, yi, z1 - 0.16), 90.0)
+            spawn(c, f'Int_Cloud_ArtLamp_{k}', lm, (-33.5, yi, z1 - 0.14), 90.0)
 
 
 def build_cloud_3f(c, protos, lm):

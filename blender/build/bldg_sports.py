@@ -22,6 +22,8 @@ def mat(name):
     if m is None:
         m = bpy.data.materials.new(name)
         m.use_nodes = True
+    if name == 'M_Paving' and m.node_tree and any(n.type == 'TEX_IMAGE' for n in m.node_tree.nodes):
+        return m
     if name in MATS:
         r, g, b, rough = MATS[name]
         bsdf = m.node_tree.nodes.get('Principled BSDF')
@@ -45,10 +47,10 @@ def sports_glass_mat():
     out = nt.nodes.new('ShaderNodeOutputMaterial')
     b = nt.nodes.new('ShaderNodeBsdfPrincipled')
     nt.links.new(b.outputs['BSDF'], out.inputs['Surface'])
-    b.inputs['Base Color'].default_value = (0.36, 0.50, 0.62, 1.0)
-    b.inputs['Roughness'].default_value = 0.08
-    b.inputs['Metallic'].default_value = 0.15
-    b.inputs['Alpha'].default_value = 0.34
+    b.inputs['Base Color'].default_value = (0.24, 0.38, 0.52, 1.0)
+    b.inputs['Roughness'].default_value = 0.05
+    b.inputs['Metallic'].default_value = 0.25
+    b.inputs['Alpha'].default_value = 0.42
     if hasattr(m, 'blend_method'):
         m.blend_method = 'BLEND'
     m.diffuse_color = (0.36, 0.50, 0.62, 0.34)
@@ -171,6 +173,13 @@ def roof(c):
         f.normal_update()
         if f.normal.z < 0:
             f.normal_flip()
+    # 按法线夹角拆分脊线/折线硬边，消除 L 形坡屋面对角阴影折痕
+    sharp_edges = [
+        e for e in bm.edges
+        if len(e.link_faces) == 2 and e.calc_face_angle(0.0) > math.radians(14.0)
+    ]
+    if sharp_edges:
+        bmesh.ops.split_edges(bm, edges=sharp_edges)
     uvl = bm.loops.layers.uv.new('UVMap')
     for f in bm.faces:
         for lp in f.loops:
@@ -220,22 +229,34 @@ def roof_rim(c):
 
 
 def bleachers(c):
-    p0 = Vector((-193.0, -115.0))
-    p1 = Vector((-217.5, -48.5))
+    """P10 精确对齐跑道局部坐标系的 8 级混凝土看台：
+    严格退让至 track_local x in [-52.10, -45.70]（距红跑道外缘 -44.745 m 留出 0.95 m 安全通道，绝不占用跑道！）。"""
+    S = json.load(open(os.path.join(ROOT, 'data', 'site.json')))
+    T = S['track']
+    tcx, tcy = T['center']
+    tang = math.radians(T['long_axis_deg_west_of_north'])
+    ca, sa = math.cos(tang), math.sin(tang)
+
+    def to_w(lx, ly):
+        return Vector((tcx + lx * ca - ly * sa, tcy + lx * sa + ly * ca))
+
+    x_back = -52.10
+    depth_tot = 6.40   # 前缘落在 x_local = -45.70（距跑道外缘 -44.745 净距 0.955 m）
+    y_s, y_n = -88.0, -18.5
+    p0 = to_w(x_back, y_s)
+    p1 = to_w(x_back, y_n)
     ax = (p1 - p0).normalized()
     L_tot = (p1 - p0).length
-    perp = Vector((-ax.y, ax.x))
-    if perp.x < 0:
-        perp = -perp
+    perp = Vector((ca, sa))  # 跑道局部 +X（正东偏北，严格垂直于跑道直道！）
 
     bm = bmesh.new()
-    steps = 9
-    depth_tot = 9.0
-    h_tot = 5.4
+    steps = 7
+    h_front = 1.12
+    h_tot = 4.62
     for k in range(steps):
         d0 = depth_tot * (k / steps)
         d1 = depth_tot * ((k + 1) / steps)
-        zt = h_tot * (1.0 - k / steps)
+        zt = h_front + (h_tot - h_front) * (1.0 - k / (steps - 1))
         zb = 0.0
         q0 = p0 + perp * d0; q1 = p1 + perp * d0
         q2 = p1 + perp * d1; q3 = p0 + perp * d1
@@ -253,15 +274,15 @@ def bleachers(c):
         for k in range(steps):
             d0 = depth_tot * (k / steps)
             d1 = depth_tot * ((k + 1) / steps)
-            zt = h_tot * (1.0 - k / steps) + 0.03
-            c0 = p0 + ax * (s_mid - 1.1) + perp * d0
-            c1 = p0 + ax * (s_mid + 1.1) + perp * d0
-            c2 = p0 + ax * (s_mid + 1.1) + perp * d1
-            c3 = p0 + ax * (s_mid - 1.1) + perp * d1
+            zt = h_front + (h_tot - h_front) * (1.0 - k / (steps - 1)) + 0.025
+            c0 = p0 + ax * (s_mid - 1.05) + perp * d0
+            c1 = p0 + ax * (s_mid + 1.05) + perp * d0
+            c2 = p0 + ax * (s_mid + 1.05) + perp * d1
+            c3 = p0 + ax * (s_mid - 1.05) + perp * d1
             bm.faces.new([bm.verts.new((c0.x, c0.y, zt)), bm.verts.new((c1.x, c1.y, zt)),
                           bm.verts.new((c2.x, c2.y, zt)), bm.verts.new((c3.x, c3.y, zt))]).material_index = 2
 
-    r0 = p0 + perp * 0.25; r1 = p1 + perp * 0.25
+    r0 = p0 + perp * 0.22; r1 = p1 + perp * 0.22
     bm.faces.new([
         bm.verts.new((r0.x, r0.y, h_tot + 0.96)), bm.verts.new((r1.x, r1.y, h_tot + 0.96)),
         bm.verts.new((r1.x, r1.y, h_tot + 1.08)), bm.verts.new((r0.x, r0.y, h_tot + 1.08)),
@@ -275,6 +296,8 @@ def bleachers(c):
         ]).material_index = 1
 
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    old_m = bpy.data.meshes.get('Bldg_SportsArt_Bleachers')
+    if old_m: bpy.data.meshes.remove(old_m, do_unlink=True)
     me = bpy.data.meshes.new('Bldg_SportsArt_Bleachers')
     bm.to_mesh(me); bm.free()
     me.materials.append(mat('M_Paving'))
@@ -282,15 +305,18 @@ def bleachers(c):
     me.materials.append(mat('M_Cloud_Core'))
     c.objects.link(bpy.data.objects.new('Bldg_SportsArt_Bleachers', me))
 
+    # 前挡墙校训标语（紧贴看台最前立面外 0.04 m，位于 x_local = -45.66，离红跑道外缘仍有 0.91 m 净距）
     bm_w = bmesh.new()
     uvl = bm_w.loops.layers.uv.new('UVMap')
-    w0 = p0 + ax * 14.0 + perp * (depth_tot + 0.06)
-    w1 = p0 + ax * (L_tot - 14.0) + perp * (depth_tot + 0.06)
-    vs = [bm_w.verts.new((w0.x, w0.y, 0.05)), bm_w.verts.new((w1.x, w1.y, 0.05)),
-          bm_w.verts.new((w1.x, w1.y, 2.35)), bm_w.verts.new((w0.x, w0.y, 2.35))]
+    w0 = p0 + ax * 18.0 + perp * (depth_tot + 0.04)
+    w1 = p0 + ax * (L_tot - 18.0) + perp * (depth_tot + 0.04)
+    vs = [bm_w.verts.new((w0.x, w0.y, 0.08)), bm_w.verts.new((w1.x, w1.y, 0.08)),
+          bm_w.verts.new((w1.x, w1.y, 1.12)), bm_w.verts.new((w0.x, w0.y, 1.12))]
     fw = bm_w.faces.new(vs)
     for lp, uv in zip(fw.loops, [(0, 0), (1, 0), (1, 1), (0, 1)]):
         lp[uvl].uv = uv
+    old_w = bpy.data.meshes.get('Bldg_SportsArt_SloganWall')
+    if old_w: bpy.data.meshes.remove(old_w, do_unlink=True)
     me_w = bpy.data.meshes.new('Bldg_SportsArt_SloganWall')
     bm_w.to_mesh(me_w); bm_w.free()
     me_w.materials.append(img_mat('M_BleacherSlogan', 'bleacher_slogan.png', 0.80, 0.0, (0.70, 0.70, 0.68, 1)))

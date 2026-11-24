@@ -1,9 +1,9 @@
-"""P6 学术中心屋面：坡屋面网格与采光天窗数据 → data/bldg_cloud_roof.json。
+"""P6/P10 学术中心屋面：坡屋面网格与三处采光天窗数据 → data/bldg_cloud_roof.json。
 
 照片（wx_01、wx_02、wx_08、wx_23、wx_35）：
-- 深灰蓝金属直立锁边坡屋面，沿每翼中线有屋脊、转角处有斜脊，外缘一圈浅色金属檐口顶边；
-- 东西两处条形采光井上方覆盖暗框玻璃天窗（wx_02、wx_23）。
-采用 cv2.Subdiv2D + 严格点在多边形内检验生成干净三角网，避免 bmesh triangle_fill 在多洞凹多边形上的跨洞破面。
+- 深灰蓝金属直立锁边坡屋面，沿每翼中线有屋脊、转角处有斜脊，外缘一圈浅色金属女儿墙压顶；
+- 东西两处 + 北翼第 3 处条形采光井均在坡屋面精准抠洞，单独生成带井壁框与玻璃格栅的天窗。
+采用 cv2.Subdiv2D + 严格点在多边形内检验生成干净三角网，避免跨洞破面。
 """
 import sys, os, json, math, cv2, numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -11,8 +11,8 @@ import worldgrid as wg, p2_cloud as PC, p3_cloud as P3
 
 SLOPE = 0.055
 CAP = 11.0
-RIM = 1.2
-GRID_STEP = 2.8      # 内部规则网格间距 (m)
+RIM = 1.15
+GRID_STEP = 2.4      # 内部规则网格间距 (m)
 
 
 def roof_z_base(x, y):
@@ -29,11 +29,11 @@ def triangulate_panel(panel_mask, edge_dist_m):
     for c in cs:
         if cv2.contourArea(c) * PC.RES * PC.RES < 4.0:
             continue
-        ap = cv2.approxPolyDP(c, 0.25 / PC.RES, True)[:, 0, :].astype(float)
+        ap = cv2.approxPolyDP(c, 0.20 / PC.RES, True)[:, 0, :].astype(float)
         # 加密长边，保证网格贴合圆角与脊线
         for i in range(len(ap)):
             a, b = ap[i], ap[(i + 1) % len(ap)]
-            n = max(1, int(math.hypot(*(b - a)) * PC.RES / GRID_STEP))
+            n = max(1, int(math.ceil(math.hypot(*(b - a)) * PC.RES / GRID_STEP)))
             for k in range(n):
                 pts.append(tuple(a + (b - a) * (k / n)))
     step_px = max(2, int(round(GRID_STEP / PC.RES)))
@@ -56,7 +56,7 @@ def triangulate_panel(panel_mask, edge_dist_m):
             d = float(edge_dist_m[yi, xi])
             w = wg.to_world([[x, y]], PC.RES, PC.EXT)[0]
             wx, wy = float(w[0]), float(w[1])
-            z = roof_z_base(wx, wy) + 0.22 + SLOPE * min(d, CAP)
+            z = roof_z_base(wx, wy) + 0.16 + SLOPE * min(d, CAP)
             idx[k] = len(verts)
             verts.append([round(wx, 2), round(wy, 2), round(z, 3)])
         return idx[k]
@@ -69,12 +69,16 @@ def triangulate_panel(panel_mask, edge_dist_m):
             continue
         if panel_mask[cy, cx] == 0:
             continue
-        # 再检查三条边中点均在掩膜内，彻底杜绝跨窄缝/跨天窗的错误三角形
+        # 检查三条边中点及三等分点均在掩膜内，彻底杜绝跨窄缝/跨天窗的错误三角形
         ok = True
         for p1, p2 in ((a, b), (b, c), (c, a)):
-            mx, my = int(round((p1[0] + p2[0]) / 2)), int(round((p1[1] + p2[1]) / 2))
-            if not (0 <= mx < W and 0 <= my < H and panel_mask[my, mx] > 0):
-                ok = False
+            for frac in (0.33, 0.5, 0.67):
+                mx = int(round(p1[0] + (p2[0] - p1[0]) * frac))
+                my = int(round(p1[1] + (p2[1] - p1[1]) * frac))
+                if not (0 <= mx < W and 0 <= my < H and panel_mask[my, mx] > 0):
+                    ok = False
+                    break
+            if not ok:
                 break
         if not ok:
             continue
@@ -86,7 +90,10 @@ def triangulate_panel(panel_mask, edge_dist_m):
 
 def main():
     shell = P3.shell_mask()
-    # 屋面板边缘距离场（含外缘和内院缘，但先把两个小采光井填平后再算距离场，使屋脊沿翼中线平滑）
+    cy_path = os.path.join(wg.ROOT, 'data', 'cloud_courtyard.json')
+    CY = json.load(open(cy_path)) if os.path.exists(cy_path) else {}
+
+    # 屋面板边缘距离场（先把东西采光井填平后再算距离场，使屋脊沿翼中线平滑）
     cs, h = cv2.findContours(shell, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
     shell_no_sky = shell.copy()
     skylights = []
@@ -99,21 +106,40 @@ def main():
             ap = cv2.approxPolyDP(c, 0.15 / PC.RES, True)[:, 0, :].astype(float)
             w = wg.to_world(ap, PC.RES, PC.EXT)
             skylights.append([[round(float(x), 2), round(float(y), 2)] for x, y in w])
+
+    if 'north_skylight' in CY:
+        skylights.append([[round(float(x), 2), round(float(y), 2)] for x, y in CY['north_skylight']])
+
     edge_dist_m = cv2.distanceTransform(shell_no_sky, cv2.DIST_L2, 5) * PC.RES
-    # panel_mask：外缘和内院缘内收 RIM，同时保留采光井开口（略外扩 0.2 m 留边框）
+    # panel_mask：外缘和内院缘内收 RIM，同时在全部 3 处采光井精确抠洞
     panel_mask = PC.offset(shell_no_sky, -RIM)
     for sky in skylights:
         poly = wg.to_px(sky, PC.RES, PC.EXT).astype(np.int32)
         cv2.fillPoly(panel_mask, [poly], 0)
+
     verts, faces = triangulate_panel(panel_mask, edge_dist_m)
+    # 计算每条天窗顶面所需屋面局部基准高程，供天窗井壁框精确贴合
+    skylight_z = []
+    H, W = edge_dist_m.shape
+    for sky in skylights:
+        pxs = wg.to_px(sky, PC.RES, PC.EXT)
+        zs = []
+        for (wx, wy), (px, py) in zip(sky, pxs):
+            xi = int(np.clip(round(px), 0, W - 1))
+            yi = int(np.clip(round(py), 0, H - 1))
+            d = float(edge_dist_m[yi, xi])
+            zs.append(round(roof_z_base(wx, wy) + 0.16 + SLOPE * min(d, CAP), 3))
+        skylight_z.append(zs)
+
     panel = PC.polys(panel_mask, eps=0.1, min_area=4)
     edge = PC.polys(shell, eps=0.1, min_area=4)
-    out = dict(source='tools/p6_cloud_roof.py：照片所见屋脊/斜脊 + 05 剖面 + Delaunay 严格防破面三角网',
+    out = dict(source='tools/p6_cloud_roof.py：照片所见屋脊/斜脊 + 05 剖面 + Delaunay 严格防破面三角网（含东西北3天窗抠洞）',
                slope=SLOPE, cap=CAP, rim=RIM,
                ramp_axis_deg=P3.RAMP_AXIS_DEG, ramp_u=P3.RAMP_U,
-               note='z = 屋面标高(u) + slope × min(d, cap)；采光井单独生成暗框玻璃天窗',
+               note='z = 屋面标高(u) + 0.16 + slope × min(d, cap)；3 处采光井单独生成带框玻璃天窗',
                mesh=dict(verts=verts, faces=faces),
                skylights=skylights,
+               skylight_z=skylight_z,
                panel=panel, edge=edge)
     json.dump(out, open(os.path.join(wg.ROOT, 'data', 'bldg_cloud_roof.json'), 'w'), ensure_ascii=False)
     print('roof mesh v/f', len(verts), len(faces), 'skylights', len(skylights))

@@ -31,31 +31,83 @@ labelRenderer.setSize(innerWidth, innerHeight);
 Object.assign(labelRenderer.domElement.style, { position: 'fixed', inset: '0', pointerEvents: 'none' });
 document.body.appendChild(labelRenderer.domElement);
 
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xcfdbe6);
-scene.fog = new THREE.Fog(0xcfdbe6, 1500, 5000);
+scene.background = new THREE.Color(0xdbe6ef);
+scene.fog = new THREE.Fog(0xdbe6ef, 900, 2900);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.52;
+scene.environmentIntensity = 0.58;
 
-const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.5, 8000);
+// 轻量渐变天穹（海口晴空蓝天 -> 柔和海平线薄雾，零额外纹理加载）
+const skyGeo = new THREE.SphereGeometry(2800, 24, 16);
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  depthWrite: false,
+  fog: false,
+  uniforms: {
+    topColor: { value: new THREE.Color(0x6da6db) },
+    midColor: { value: new THREE.Color(0xb8d4ea) },
+    bottomColor: { value: new THREE.Color(0xdbe6ef) },
+  },
+  vertexShader: 'varying vec3 vW; void main(){ vW = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `
+    uniform vec3 topColor; uniform vec3 midColor; uniform vec3 bottomColor;
+    varying vec3 vW;
+    void main() {
+      float h = clamp(normalize(vW).y, 0.0, 1.0);
+      vec3 c = mix(bottomColor, midColor, smoothstep(0.0, 0.22, h));
+      c = mix(c, topColor, smoothstep(0.18, 0.78, h));
+      gl_FragColor = vec4(c, 1.0);
+    }
+  `,
+});
+scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 1.2, 3200);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.maxPolarAngle = Math.PI * 0.495;
 controls.minDistance = 8;
-controls.maxDistance = 2500;
+controls.maxDistance = 1800;
 
-scene.add(new THREE.HemisphereLight(0xe3edf7, 0x7d8670, 1.3));
+scene.add(new THREE.HemisphereLight(0xe6f0fa, 0x7d8670, 1.25));
+const SUN_DIR = b2t([-0.627, -0.439, 0.643]).normalize();
 const sun = new THREE.DirectionalLight(0xfff4e5, 3.2);
-sun.position.copy(b2t([-0.627, -0.439, 0.643]).multiplyScalar(600));
 sun.castShadow = true;
 sun.shadow.mapSize.setScalar(mobile ? 2048 : 4096);
-Object.assign(sun.shadow.camera, { left: -380, right: 380, top: 300, bottom: -300, near: 10, far: 1500 });
-sun.shadow.bias = -0.0005;
-sun.shadow.normalBias = 0.4;
+sun.shadow.bias = -0.00025;
+sun.shadow.normalBias = 0.055;
 scene.add(sun, sun.target);
 
-const far = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0x6f7c62 }));
+let lastShadowMode = null;
+const lastShadowCenter = new THREE.Vector3(1e9, 1e9, 1e9);
+function updateSunShadow(focusPos, isFps) {
+  if (isFps) {
+    // FPS 模式：动态聚焦 130×130 m 高密阴影视锥（4096px ≈ 3.2 cm/纹素），并按 1 m 格点对齐防止阴影抖动
+    const sx = Math.round(focusPos.x);
+    const sz = Math.round(focusPos.z);
+    if (lastShadowMode !== 'fps' || Math.abs(sx - lastShadowCenter.x) >= 2 || Math.abs(sz - lastShadowCenter.z) >= 2) {
+      lastShadowMode = 'fps';
+      lastShadowCenter.set(sx, 0, sz);
+      sun.target.position.set(sx, focusPos.y, sz);
+      sun.position.copy(sun.target.position).addScaledVector(SUN_DIR, 260);
+      Object.assign(sun.shadow.camera, { left: -65, right: 65, top: 65, bottom: -65, near: 10, far: 520 });
+      sun.shadow.normalBias = 0.035;
+      sun.shadow.camera.updateProjectionMatrix();
+    }
+  } else if (lastShadowMode !== 'orbit') {
+    lastShadowMode = 'orbit';
+    sun.target.position.set(-40, 0, 50);
+    sun.position.copy(sun.target.position).addScaledVector(SUN_DIR, 560);
+    Object.assign(sun.shadow.camera, { left: -340, right: 340, top: 270, bottom: -270, near: 20, far: 1150 });
+    sun.shadow.normalBias = 0.065;
+    sun.shadow.camera.updateProjectionMatrix();
+  }
+}
+updateSunShadow(new THREE.Vector3(-40, 0, 50), false);
+
+const far = new THREE.Mesh(new THREE.PlaneGeometry(8000, 8000), new THREE.MeshLambertMaterial({ color: 0x768468 }));
 far.rotation.x = -Math.PI / 2;
 far.position.y = -6.5;
 far.receiveShadow = true;
@@ -75,10 +127,12 @@ function applyFov() {
   camera.aspect = innerWidth / innerHeight;
   if (mode === 'fps') {
     camera.fov = mobile ? 66 : 60;
-    camera.near = 0.12;
+    camera.near = 0.22;
+    camera.far = 1600;
   } else {
     camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(hfov / 2) / Math.max(camera.aspect, 0.8)));
-    camera.near = 0.8;
+    camera.near = 1.2;
+    camera.far = 3200;
   }
   camera.updateProjectionMatrix();
 }
@@ -120,7 +174,7 @@ setView(params.get('view') || 'aerial', false);
 // ---------- 模型与分包加载器 ----------
 const draco = new DRACOLoader();
 const loader = new GLTFLoader().setDRACOLoader(draco);
-const chunkLoader = new ChunkLoader(scene, loader, (msg) => { statusEl.textContent = msg; });
+const chunkLoader = new ChunkLoader(scene, loader, (msg) => { statusEl.textContent = msg; }, maxAniso);
 
 const t0 = performance.now();
 const gltf = await loader.loadAsync('./bdfz.glb', (e) => {
@@ -134,14 +188,22 @@ model.traverse((o) => {
   while (p && !layer) { layer = p.userData.layer; bldg = p.userData.bldg; p = p.parent; }
   o.userData.layer = layer; o.userData.bldg = bldg;
   if (!o.isMesh) return;
-  o.castShadow = layer !== 'site' && !/CourtFloor|CourtLawn|Island_|PlazaAccent|CourtGrass/.test(o.name);
+  o.castShadow = layer !== 'site' && !/CourtFloor|CourtLawn|Island_|PlazaAccent|CourtGrass|VectorLines|Track_Lanes|Road_Markings/.test(o.name);
   o.receiveShadow = true;
   if (layer && layers[layer]) layers[layer].push(o);
   if (bldg) (byBldg[bldg] ||= []).push(o);
   const mats = Array.isArray(o.material) ? o.material : [o.material];
   for (const m of mats) {
+    for (const slot of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap']) {
+      if (m[slot]) {
+        m[slot].anisotropy = maxAniso;
+        m[slot].needsUpdate = true;
+      }
+    }
     if (m.transparent && m.opacity > 0.9) m.transparent = false;
     if (m.transparent) { m.depthWrite = false; m.side = THREE.DoubleSide; }
+    if (m.name === 'M_SportsGlass') { m.envMapIntensity = 1.45; }
+    if (m.name === 'M_Paving' && m.normalMap) { m.normalScale?.set(0.32, 0.32); }
   }
 });
 scene.add(model);
@@ -402,10 +464,14 @@ renderer.setAnimationLoop((now) => {
   if (mode === 'fps') {
     fps.update(dt, now);
     chunkLoader.updateForPosition(fps.feetPos, true, forcedZone);
+    chunkLoader.updateAnimation(now);
+    teleport.update(now);
+    updateSunShadow(fps.feetPos, true);
     if (!minimapWrap.hidden) minimap.render(fps.feetPos, fps.yaw);
   } else {
     stepTween(now);
     controls.update();
+    updateSunShadow(controls.target, false);
   }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);

@@ -83,17 +83,28 @@ def water_mat():
     m = bpy.data.materials.get('M_Int_PoolWater')
     if m is None:
         m = bpy.data.materials.new('M_Int_PoolWater')
-        m.use_nodes = True
+    m.use_nodes = True
     nt = m.node_tree; nt.nodes.clear()
     out = nt.nodes.new('ShaderNodeOutputMaterial')
     b = nt.nodes.new('ShaderNodeBsdfPrincipled')
     nt.links.new(b.outputs['BSDF'], out.inputs['Surface'])
-    b.inputs['Base Color'].default_value = (0.14, 0.72, 0.88, 1.0)
-    b.inputs['Roughness'].default_value = 0.08
-    b.inputs['Alpha'].default_value = 0.42
+    b.inputs['Base Color'].default_value = (0.12, 0.68, 0.86, 1.0)
+    b.inputs['Roughness'].default_value = 0.05
+    b.inputs['Metallic'].default_value = 0.08
+    b.inputs['Alpha'].default_value = 0.56
+    wn_path = os.path.join(TEX, 'pool_water_normal.png')
+    if os.path.exists(wn_path):
+        tn = nt.nodes.new('ShaderNodeTexImage')
+        img = bpy.data.images.load(wn_path, check_existing=True); img.reload()
+        img.colorspace_settings.name = 'Non-Color'
+        tn.image = img
+        nmap = nt.nodes.new('ShaderNodeNormalMap')
+        nmap.inputs['Strength'].default_value = 0.42
+        nt.links.new(tn.outputs['Color'], nmap.inputs['Color'])
+        nt.links.new(nmap.outputs['Normal'], b.inputs['Normal'])
     if hasattr(m, 'blend_method'):
         m.blend_method = 'BLEND'
-    m.diffuse_color = (0.14, 0.72, 0.88, 0.42)
+    m.diffuse_color = (0.12, 0.68, 0.86, 0.56)
     return m
 
 
@@ -159,8 +170,10 @@ def theater_seat_mesh():
     # 金属支腿 (6), 暗红坐垫与靠背 (4), 扶手 (3)
     add_uv_box(bm, uvl, 6, (-0.24, -0.05, 0.0), (-0.20, 0.05, 0.42))
     add_uv_box(bm, uvl, 6, (0.20, -0.05, 0.0), (0.24, 0.05, 0.42))
-    add_uv_box(bm, uvl, 4, (-0.23, -0.20, 0.40), (0.23, 0.24, 0.50))
-    add_uv_box(bm, uvl, 4, (-0.23, -0.22, 0.46), (0.23, -0.10, 0.96))
+    add_uv_box(bm, uvl, 4, (-0.23, -0.18, 0.39), (0.23, 0.24, 0.49))
+    # 微仰角人体工学软包靠背 + 头枕收口
+    add_uv_box(bm, uvl, 4, (-0.23, -0.20, 0.47), (0.23, -0.11, 0.74))
+    add_uv_box(bm, uvl, 4, (-0.22, -0.24, 0.72), (0.22, -0.15, 0.98))
     add_uv_box(bm, uvl, 3, (-0.27, -0.16, 0.56), (-0.22, 0.22, 0.62))
     add_uv_box(bm, uvl, 3, (0.22, -0.16, 0.56), (0.27, 0.22, 0.62))
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -233,6 +246,49 @@ def build_basketball_hall(c, lamp_me):
     for lp, uv in zip(fc.loops, [(0, 0), (1, 0), (1, 1), (0, 1)]):
         lp[uvl_c].uv = uv
     link_local('Int_Sports_GymWoodCourt', bm_c, [m_wood], cx, cy, z0, ang, c)
+
+    # 室内篮球馆纯 3D 矢量锐利球场白线（主原木场 15×28 m + 东侧副场 11×24 m）
+    bm_gl = bmesh.new()
+    def _seg(a0, a1, w, z):
+        dx, dy = a1[0] - a0[0], a1[1] - a0[1]
+        L_ = math.hypot(dx, dy)
+        if L_ < 1e-4: return
+        nx, ny = -dy / L_ * (w * 0.5), dx / L_ * (w * 0.5)
+        bm_gl.faces.new([bm_gl.verts.new((a0[0]+nx, a0[1]+ny, z)), bm_gl.verts.new((a0[0]-nx, a0[1]-ny, z)),
+                         bm_gl.verts.new((a1[0]-nx, a1[1]-ny, z)), bm_gl.verts.new((a1[0]+nx, a1[1]+ny, z))])
+    def _rect(x0, y0, x1, y1, w, z):
+        _seg((x0, y0), (x1, y0), w, z); _seg((x1, y0), (x1, y1), w, z)
+        _seg((x1, y1), (x0, y1), w, z); _seg((x0, y1), (x0, y0), w, z)
+    def _arc(ox, oy, r, a0, a1, w, z, segs=32):
+        ri, ro = r - w * 0.5, r + w * 0.5
+        vi = [bm_gl.verts.new((ox + ri * math.cos(a0 + (a1-a0)*i/segs), oy + ri * math.sin(a0 + (a1-a0)*i/segs), z)) for i in range(segs+1)]
+        vo = [bm_gl.verts.new((ox + ro * math.cos(a0 + (a1-a0)*i/segs), oy + ro * math.sin(a0 + (a1-a0)*i/segs), z)) for i in range(segs+1)]
+        for i in range(segs):
+            bm_gl.faces.new((vo[i], vo[i+1], vi[i+1], vi[i]))
+    # 主原木球场中心 (-6.4, 0.0), 宽 15 m × 长 28 m
+    mcx, cw, cl, zlw, lw = -6.4, 15.0, 28.0, 0.036, 0.07
+    _rect(mcx - cw/2, -cl/2, mcx + cw/2, cl/2, lw, zlw)
+    _seg((mcx - cw/2, 0.0), (mcx + cw/2, 0.0), lw, zlw)
+    _arc(mcx, 0.0, 1.8, 0.0, 2*math.pi, lw, zlw, 36)
+    ang3 = math.asin(6.6 / 6.75)
+    dy3 = math.sqrt(6.75**2 - 6.6**2)
+    for sgn in (1.0, -1.0):
+        bl = sgn * cl / 2.0; yft = bl - sgn * 5.8; yh = bl - sgn * 1.575
+        _rect(mcx - 2.45, min(bl, yft), mcx + 2.45, max(bl, yft), lw, zlw)
+        _arc(mcx, yft, 1.8, 0.0, 2*math.pi, lw, zlw, 28)
+        yj = yh - sgn * dy3
+        _seg((mcx - 6.6, bl), (mcx - 6.6, yj), lw, zlw)
+        _seg((mcx + 6.6, bl), (mcx + 6.6, yj), lw, zlw)
+        if sgn > 0:
+            _arc(mcx, yh, 6.75, -math.pi/2 - ang3, -math.pi/2 + ang3, lw, zlw, 32)
+        else:
+            _arc(mcx, yh, 6.75, math.pi/2 - ang3, math.pi/2 + ang3, lw, zlw, 32)
+    # 东侧蓝色训练场中心 (8.5, 0.0), 宽 11 m × 长 26 m
+    _rect(3.0, -13.0, 14.0, 13.0, 0.065, 0.032)
+    _seg((3.0, 0.0), (14.0, 0.0), 0.065, 0.032)
+    _arc(8.5, 0.0, 1.5, 0.0, 2*math.pi, 0.065, 0.032, 28)
+    m_wl = bpy.data.materials.get('M_LineWhite') or m_atl
+    link_local('Int_Sports_GymLines', bm_gl, [m_wl], cx, cy, z0, ang, c)
 
     # 4 套室内篮球架（复用已实例化 Site_BasketHoopUnit！）
     hoop_me = bpy.data.meshes.get('Site_BasketHoopUnit')
@@ -310,9 +366,11 @@ def build_swimming_pool(c, lamp_me):
         lp[uvl_f].uv = uv
     link_local('Int_Sports_PoolFloor', bm_f, [m_pool], cx, cy, z0, ang, c)
 
-    # 半透明碧蓝泳池水面
-    bm_w = bmesh.new()
-    bm_w.faces.new([bm_w.verts.new(p) for p in ((-pw/2, -pl/2, -0.10), (pw/2, -pl/2, -0.10), (pw/2, pl/2, -0.10), (-pw/2, pl/2, -0.10))])
+    # 半透明碧蓝泳池水面（平铺水波法线 UV 10x24，呈现真实涟漪高光）
+    bm_w = bmesh.new(); uvl_w = bm_w.loops.layers.uv.new('UVMap')
+    fw = bm_w.faces.new([bm_w.verts.new(p) for p in ((-pw/2, -pl/2, -0.10), (pw/2, -pl/2, -0.10), (pw/2, pl/2, -0.10), (-pw/2, pl/2, -0.10))])
+    for lp, uv in zip(fw.loops, [(0, 0), (10, 0), (10, 24), (0, 24)]):
+        lp[uvl_w].uv = uv
     link_local('Int_Sports_PoolWater', bm_w, [m_wat], cx, cy, z0, ang, c)
 
     # 18 盏泳池顶灯（实例化）

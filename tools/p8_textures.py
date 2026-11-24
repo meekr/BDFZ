@@ -1,9 +1,10 @@
-"""P8 程序化高精度贴图生成：
-- blender/textures/sports_atlas.png  (2048x2048 四象限：足球场 / 网球场 / 绿篮球场 / 蓝篮球场)
-- blender/textures/roof_seam.png     (512x512 深蓝灰直立锁边金属屋面)
-- blender/textures/school_stone.png  (1024x384 北入口校名景石：北京大学附属中学海口学校)
-- blender/textures/bleacher_slogan.png (1024x192 看台前挡墙标语与五环)
-- blender/textures/people_palette.png (512x64 建筑配景人物统一色板)
+"""P8/P10 程序化高精度贴图生成：
+- blender/textures/sports_atlas.png      (2048x2048 四象限：柔和条纹足球草坪 / 网球红土 / 绿篮球场 / 蓝红篮球场；白线改由 site.py 3D 矢量几何生成，绝对锐利！)
+- blender/textures/roof_seam.png         (512x512 深蓝灰直立锁边金属屋面)
+- blender/textures/school_stone.png      (2048x768 北入口校名景石：细腻花岗岩纹理 + 居中留白深红大字)
+- blender/textures/bleacher_slogan.png   (1024x192 看台前挡墙标语与五环)
+- blender/textures/people_palette.png    (1024x64 16 格建筑配景人物统一色板)
+- blender/textures/pool_water_normal.png (256x256 室内泳池无缝波纹法线贴图)
 """
 import os, math
 import cv2
@@ -30,126 +31,49 @@ def find_cjk_font():
 
 
 def draw_football_quad(img, x0, y0, size):
-    """标准 11 人制足球场（长 105 m 沿 Y，宽 68 m 沿 X），带 18 道草坪条纹与完整白线。"""
-    # 象限区域：x in [x0, x0+size), y in [y0, y0+size)
-    # 留 1.5% 边距防止纹理采样渗色
+    """标准 11 人制足球场底纹（长 105 m 沿 Y，宽 68 m 沿 X），自然柔和 18 道草坪修剪条纹 + 细草丝肌理（白线由 3D 矢量几何承担）。"""
     pad_px = 14
-    L, W = 105.0, 68.0
-    # 铺底深绿草
-    img[y0:y0 + size, x0:x0 + size] = (34, 96, 40)  # BGR
-    # 18 道交替横向草坪条纹（沿长度方向 Y）
+    img[y0:y0 + size, x0:x0 + size] = (42, 112, 50)  # BGR
     stripes = 18
     x_l, x_r = x0 + pad_px, x0 + size - pad_px
     y_t, y_b = y0 + pad_px, y0 + size - pad_px
-    pw = x_r - x_l
     ph = y_b - y_t
     for i in range(stripes):
         sy0 = y_t + int(round(ph * i / stripes))
         sy1 = y_t + int(round(ph * (i + 1) / stripes))
-        col = (44, 126, 56) if i % 2 == 0 else (30, 92, 38)  # 浅绿 / 深绿 BGR
+        # 更自然的草坪明暗交替（降低过硬斑马纹反差）
+        col = (48, 124, 58) if i % 2 == 0 else (38, 106, 46)
         img[sy0:sy1, x_l:x_r] = col
 
-    # 微弱草坪颗粒噪点（保持自然但不杂乱）
+    # 细腻双频草坪质感（低频自然斑块 + 高频微粒）
     rng = np.random.default_rng(42)
-    noise = rng.integers(-6, 7, (size, size, 1), dtype=np.int16)
-    sub = img[y0:y0 + size, x0:x0 + size].astype(np.int16) + noise
+    low = cv2.resize(rng.normal(0, 3.2, (32, 32)).astype(np.float32), (size, size), interpolation=cv2.INTER_CUBIC)[..., None]
+    hi = rng.normal(0, 3.8, (size, size, 1)).astype(np.float32)
+    sub = img[y0:y0 + size, x0:x0 + size].astype(np.float32) + low + hi
     img[y0:y0 + size, x0:x0 + size] = np.clip(sub, 0, 255).astype(np.uint8)
-
-    # 坐标映射：球场局部 (xm in [-W/2, W/2], ym in [-L/2, L/2]) -> 像素
-    def pt(xm, ym):
-        px = int(round(x_l + (xm + W / 2.0) / W * pw))
-        py = int(round(y_b - (ym + L / 2.0) / L * ph))
-        return (px, py)
-
-    def rx(m):
-        return max(1, int(round(m / W * pw)))
-
-    def ry(m):
-        return max(1, int(round(m / L * ph)))
-
-    white = (242, 245, 242)
-    lw = 4
-
-    # 外边线与底线
-    cv2.rectangle(img, pt(-W / 2, L / 2), pt(W / 2, -L / 2), white, lw, cv2.LINE_AA)
-    # 中线
-    cv2.line(img, pt(-W / 2, 0), pt(W / 2, 0), white, lw, cv2.LINE_AA)
-    # 中圈 (R = 9.15 m) 与中点
-    cv2.ellipse(img, pt(0, 0), (rx(9.15), ry(9.15)), 0, 0, 360, white, lw, cv2.LINE_AA)
-    cv2.circle(img, pt(0, 0), 5, white, -1, cv2.LINE_AA)
-
-    # 南北禁区、球门区、点球点、罚球弧
-    for sgn in (1, -1):
-        gl = sgn * L / 2.0
-        # 大禁区 40.32 x 16.5 m
-        y_pen = gl - sgn * 16.5
-        cv2.rectangle(img, pt(-20.16, max(gl, y_pen)), pt(20.16, min(gl, y_pen)), white, lw, cv2.LINE_AA)
-        # 小禁区（球门区）18.32 x 5.5 m
-        y_goal = gl - sgn * 5.5
-        cv2.rectangle(img, pt(-9.16, max(gl, y_goal)), pt(9.16, min(gl, y_goal)), white, lw, cv2.LINE_AA)
-        # 点球点 (11 m)
-        y_spot = gl - sgn * 11.0
-        cv2.circle(img, pt(0, y_spot), 4, white, -1, cv2.LINE_AA)
-        # 罚球弧 (R = 9.15 m，只露在大禁区外)
-        # cos(theta) = 5.5 / 9.15 => theta = 53.05 deg
-        ang = math.degrees(math.acos(5.5 / 9.15))
-        if sgn == 1:
-            # 北端，弧朝下 (屏幕 +Y，即角度 90 ± ang)
-            cv2.ellipse(img, pt(0, y_spot), (rx(9.15), ry(9.15)), 0, 90 - ang, 90 + ang, white, lw, cv2.LINE_AA)
-        else:
-            # 南端，弧朝上 (屏幕 -Y，即角度 270 ± ang)
-            cv2.ellipse(img, pt(0, y_spot), (rx(9.15), ry(9.15)), 0, 270 - ang, 270 + ang, white, lw, cv2.LINE_AA)
-
-    # 四角角球弧 (R = 1.2 m 便于清晰可见)
-    cv2.ellipse(img, pt(-W / 2, L / 2), (rx(1.5), ry(1.5)), 0, 0, 90, white, lw, cv2.LINE_AA)
-    cv2.ellipse(img, pt(W / 2, L / 2), (rx(1.5), ry(1.5)), 0, 90, 180, white, lw, cv2.LINE_AA)
-    cv2.ellipse(img, pt(W / 2, -L / 2), (rx(1.5), ry(1.5)), 0, 180, 270, white, lw, cv2.LINE_AA)
-    cv2.ellipse(img, pt(-W / 2, -L / 2), (rx(1.5), ry(1.5)), 0, 270, 360, white, lw, cv2.LINE_AA)
 
 
 def draw_tennis_quad(img, x0, y0, size):
-    """标准网球场（总 pad 30.77 x 17.97 m，内场 23.77 x 10.97 m）：深绿外框 + 红褐红土内场 + 标准白线。"""
+    """标准网球场色彩分区（总 pad 30.77 x 17.97 m，内场 23.77 x 10.97 m）：深绿外框 + 红土内场（白线由 3D 矢量几何承担）。"""
     L_tot, W_tot = 30.77, 17.97
     L, W = 23.77, 10.97
-    Ws = 8.23
-    L_srv = 6.40
-    # 外圈深绿缓冲区 (卫星图 & wx_35)
-    img[y0:y0 + size, x0:x0 + size] = (62, 86, 62)  # 深墨绿 BGR
+    img[y0:y0 + size, x0:x0 + size] = (62, 88, 64)
 
     def pt(xm, ym):
         px = int(round(x0 + (xm + W_tot / 2.0) / W_tot * size))
         py = int(round(y0 + (L_tot / 2.0 - ym) / L_tot * size))
         return (px, py)
 
-    # 红褐/砖红比赛区（略外扩 0.25 m 与实景一致）
-    cv2.rectangle(img, pt(-W / 2 - 0.15, L / 2 + 0.15), pt(W / 2 + 0.15, -L / 2 - 0.15), (96, 114, 168), -1)
+    cv2.rectangle(img, pt(-W / 2 - 0.10, L / 2 + 0.10), pt(W / 2 + 0.10, -L / 2 - 0.10), (96, 114, 168), -1)
 
     rng = np.random.default_rng(43)
-    noise = rng.integers(-5, 6, (size, size, 1), dtype=np.int16)
+    noise = rng.integers(-4, 5, (size, size, 1), dtype=np.int16)
     sub = img[y0:y0 + size, x0:x0 + size].astype(np.int16) + noise
     img[y0:y0 + size, x0:x0 + size] = np.clip(sub, 0, 255).astype(np.uint8)
 
-    white = (244, 246, 244)
-    lw = 4
-    # 双打外框
-    cv2.rectangle(img, pt(-W / 2, L / 2), pt(W / 2, -L / 2), white, lw, cv2.LINE_AA)
-    # 单打边线
-    cv2.line(img, pt(-Ws / 2, L / 2), pt(-Ws / 2, -L / 2), white, lw, cv2.LINE_AA)
-    cv2.line(img, pt(Ws / 2, L / 2), pt(Ws / 2, -L / 2), white, lw, cv2.LINE_AA)
-    # 发球线
-    cv2.line(img, pt(-Ws / 2, L_srv), pt(Ws / 2, L_srv), white, lw, cv2.LINE_AA)
-    cv2.line(img, pt(-Ws / 2, -L_srv), pt(Ws / 2, -L_srv), white, lw, cv2.LINE_AA)
-    # 中发球线
-    cv2.line(img, pt(0, L_srv), pt(0, -L_srv), white, lw, cv2.LINE_AA)
-    # 球网参考淡线
-    cv2.line(img, pt(-W / 2 - 0.9, 0), pt(W / 2 + 0.9, 0), (200, 200, 200), 2, cv2.LINE_AA)
-    # 端线中心标记
-    cv2.line(img, pt(0, L / 2), pt(0, L / 2 - 0.4), white, lw, cv2.LINE_AA)
-    cv2.line(img, pt(0, -L / 2), pt(0, -L / 2 + 0.4), white, lw, cv2.LINE_AA)
-
 
 def draw_basketball_quad(img, x0, y0, size, apron_bgr, court_bgr, key_bgr, seed=44):
-    """标准 FIBA 篮球场（总 pad 32 x 19 m，内场 28 x 15 m）。"""
+    """标准 FIBA 篮球场色彩分区（总 pad 32 x 19 m，内场 28 x 15 m；白线由 3D 矢量几何承担）。"""
     L_tot, W_tot = 32.0, 19.0
     L, W = 28.0, 15.0
     img[y0:y0 + size, x0:x0 + size] = apron_bgr
@@ -159,15 +83,7 @@ def draw_basketball_quad(img, x0, y0, size, apron_bgr, court_bgr, key_bgr, seed=
         py = int(round(y0 + (L_tot / 2.0 - ym) / L_tot * size))
         return (px, py)
 
-    def rx(m):
-        return max(1, int(round(m / W_tot * size)))
-
-    def ry(m):
-        return max(1, int(round(m / L_tot * size)))
-
-    # 主赛区色
     cv2.rectangle(img, pt(-W / 2, L / 2), pt(W / 2, -L / 2), court_bgr, -1)
-    # 南北三秒区涂色 (宽 4.9 m, 深 5.8 m)
     for sgn in (1, -1):
         bl = sgn * L / 2.0
         y_ft = bl - sgn * 5.8
@@ -178,51 +94,17 @@ def draw_basketball_quad(img, x0, y0, size, apron_bgr, court_bgr, key_bgr, seed=
     sub = img[y0:y0 + size, x0:x0 + size].astype(np.int16) + noise
     img[y0:y0 + size, x0:x0 + size] = np.clip(sub, 0, 255).astype(np.uint8)
 
-    white = (246, 247, 246)
-    lw = 4
-    # 边线与端线
-    cv2.rectangle(img, pt(-W / 2, L / 2), pt(W / 2, -L / 2), white, lw, cv2.LINE_AA)
-    # 中线与中圈 (R = 1.8 m)
-    cv2.line(img, pt(-W / 2, 0), pt(W / 2, 0), white, lw, cv2.LINE_AA)
-    cv2.ellipse(img, pt(0, 0), (rx(1.8), ry(1.8)), 0, 0, 360, white, lw, cv2.LINE_AA)
-
-    for sgn in (1, -1):
-        bl = sgn * L / 2.0
-        y_ft = bl - sgn * 5.8
-        y_hoop = bl - sgn * 1.575
-        # 三秒区框
-        cv2.rectangle(img, pt(-2.45, max(bl, y_ft)), pt(2.45, min(bl, y_ft)), white, lw, cv2.LINE_AA)
-        # 罚球圆 (R = 1.8 m)
-        cv2.ellipse(img, pt(0, y_ft), (rx(1.8), ry(1.8)), 0, 0, 360, white, lw, cv2.LINE_AA)
-        # 三分线：底角直线 x = ±6.6 m，弧半径 R = 6.75 m 以篮筐为中心
-        dy_corner = math.sqrt(6.75 ** 2 - 6.6 ** 2)  # ~1.41 m
-        y_arc_join = y_hoop - sgn * dy_corner
-        cv2.line(img, pt(-6.6, bl), pt(-6.6, y_arc_join), white, lw, cv2.LINE_AA)
-        cv2.line(img, pt(6.6, bl), pt(6.6, y_arc_join), white, lw, cv2.LINE_AA)
-        ang = math.degrees(math.acos(6.6 / 6.75))  # ~12.1 deg
-        if sgn == 1:
-            # 北侧篮筐，三分弧朝下 (屏幕 +Y，即 12..168 deg)
-            cv2.ellipse(img, pt(0, y_hoop), (rx(6.75), ry(6.75)), 0, ang, 180 - ang, white, lw, cv2.LINE_AA)
-        else:
-            # 南侧篮筐，三分弧朝上 (屏幕 -Y，即 192..348 deg)
-            cv2.ellipse(img, pt(0, y_hoop), (rx(6.75), ry(6.75)), 0, 180 + ang, 360 - ang, white, lw, cv2.LINE_AA)
-
 
 def make_sports_atlas():
     S = 2048
     H = S // 2
     img = np.zeros((S, S, 3), dtype=np.uint8)
-    # 象限布置（Blender UV: v=0 在底部, v=1 在顶部）
-    # 图像顶部 y=0..H => UV v=0.5..1.0
     draw_football_quad(img, 0, 0, H)
     draw_tennis_quad(img, H, 0, H)
-    # 图像底部 y=H..S => UV v=0.0..0.5
-    # basket_W (卫星图：深绿主赛区 + 米黄三秒区与外圈)
     draw_basketball_quad(img, 0, H, H,
                          apron_bgr=(152, 166, 174),
                          court_bgr=(84, 108, 86),
                          key_bgr=(148, 164, 174), seed=44)
-    # basket_NE (上传照片 #5/#6：天蓝主赛区 + 砖红缓冲与三秒区)
     draw_basketball_quad(img, H, H, H,
                          apron_bgr=(92, 106, 190),
                          court_bgr=(196, 144, 88),
@@ -233,16 +115,14 @@ def make_sports_atlas():
 
 
 def make_roof_seam():
-    """深蓝灰直立锁边金属坡屋面纹理（带竖向锁边肋条与细微光伏分区肌理）。"""
+    """深蓝灰直立锁边金属坡屋面纹理（带竖向锁边肋条与细微金属光泽肌理）。"""
     W, H = 512, 512
-    im = np.full((H, W, 3), (62, 52, 44), dtype=np.uint8)  # 深蓝灰 BGR
-    # 16 条锁边纵肋
+    im = np.full((H, W, 3), (62, 52, 44), dtype=np.uint8)
     step = W // 16
     for x in range(0, W, step):
         im[:, max(0, x - 1):min(W, x + 1)] = (42, 36, 30)
         if x + 2 < W:
             im[:, x + 1:x + 3] = (80, 68, 58)
-    # 横向金属板接缝
     for y in (H // 2, H - 1):
         cv2.line(im, (0, y), (W, y), (46, 40, 34), 2)
     rng = np.random.default_rng(7)
@@ -254,33 +134,43 @@ def make_roof_seam():
 
 
 def make_school_stone():
-    """北入口校名景石：灰白纹理天然景石 + 深红书法字样“北京大学附属中学海口学校”。"""
-    W, H = 1024, 384
+    """北入口校名景石 (2048x768)：细腻浅灰天然花岗岩纹理 + 充裕边距的深红书法字样“北京大学附属中学海口学校”。"""
+    W, H = 2048, 768
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
-    # 多频自然花岗岩纹理
     rng0 = np.random.default_rng(19)
-    low = cv2.resize(rng0.normal(0, 1, (16, 42)).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC)
-    mid = cv2.resize(rng0.normal(0, 1, (48, 128)).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC)
-    wave = np.sin(yy * 0.065 + low * 2.2 + mid * 0.7) * 0.6 + low * 0.5
-    base = 148 + wave * 26
+    low = cv2.resize(rng0.normal(0, 1, (18, 48)).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC)
+    mid = cv2.resize(rng0.normal(0, 1, (64, 160)).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC)
+    fine = cv2.resize(rng0.normal(0, 1, (192, 512)).astype(np.float32), (W, H), interpolation=cv2.INTER_LINEAR)
+    wave = np.sin(yy * 0.028 + low * 2.0 + mid * 0.55) * 0.45 + low * 0.45 + fine * 0.18
+    base = 166 + wave * 20
     rng = np.random.default_rng(11)
-    grain = rng.normal(0, 8, (H, W))
-    g = np.clip(base + grain, 60, 220).astype(np.uint8)
-    arr = np.stack([g, g, np.clip(g.astype(int) + 3, 0, 255).astype(np.uint8)], axis=-1)
+    grain = rng.normal(0, 5.5, (H, W))
+    g = np.clip(base + grain, 90, 232).astype(np.uint8)
+    arr = np.stack([g, g, np.clip(g.astype(int) + 2, 0, 255).astype(np.uint8)], axis=-1)
     pil = Image.fromarray(arr, mode='RGB')
     draw = ImageDraw.Draw(pil)
     fp = find_cjk_font()
     text = '北京大学附属中学海口学校'
-    font = ImageFont.truetype(fp, 74) if fp else ImageFont.load_default()
+    # 自适应字号，确保文字总宽 <= 76% 石面宽度（左右留足自然石面，绝不压边裁切）
+    font_size = 132
+    font = ImageFont.truetype(fp, font_size) if fp else ImageFont.load_default()
+    if fp:
+        while font_size > 60:
+            font = ImageFont.truetype(fp, font_size)
+            bbox = draw.textbbox((0, 0), text, font=font)
+            if (bbox[2] - bbox[0]) <= int(W * 0.76):
+                break
+            font_size -= 4
     bbox = draw.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    tx, ty = (W - tw) // 2, (H - th) // 2 - 8
-    # 浅刻影 + 深红字
-    draw.text((tx + 2, ty + 2), text, font=font, fill=(65, 55, 55))
-    draw.text((tx, ty), text, font=font, fill=(138, 26, 26))
+    tx = (W - tw) // 2 - bbox[0]
+    ty = int(H * 0.46) - th // 2 - bbox[1]
+    # 浅阴刻阴影 + 饱满深红校名大字
+    draw.text((tx + 3, ty + 3), text, font=font, fill=(72, 62, 62))
+    draw.text((tx, ty), text, font=font, fill=(148, 22, 22))
     p = os.path.join(OUT, 'school_stone.png')
     pil.save(p)
-    print('wrote', p)
+    print('wrote', p, 'font_size=', font_size)
 
 
 def make_bleacher_slogan():
@@ -288,7 +178,6 @@ def make_bleacher_slogan():
     W, H = 1024, 192
     pil = Image.new('RGB', (W, H), (178, 179, 176))
     draw = ImageDraw.Draw(pil)
-    # 混凝土模板分缝
     for x in range(0, W, 128):
         draw.line([(x, 0), (x, H)], fill=(158, 159, 156), width=2)
     fp = find_cjk_font()
@@ -297,7 +186,6 @@ def make_bleacher_slogan():
     bbox = draw.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
     draw.text(((W - tw) // 2, (H - th) // 2 - 4), text, font=font, fill=(72, 80, 88))
-    # 两侧奥运五环小装饰（不与文字重叠）
     colors = [(0, 120, 200), (240, 175, 0), (35, 35, 35), (0, 150, 70), (215, 38, 46)]
     for cx0 in (52, W - 118):
         offs = [(0, 0), (14, 14), (28, 0), (42, 14), (56, 0)]
@@ -310,20 +198,31 @@ def make_bleacher_slogan():
 
 
 def make_people_palette():
-    """8 格建筑配景人物统一色板 (512x64)：每格 64px 宽，单材质 UV 映射全员着装。
-    0: 肤色, 1: 深发, 2: 白校服, 3: 藏青校裤, 4: 蓝球衣, 5: 红橙球衣, 6: 教师浅蓝衬衫, 7: 暗灰长裤/书包
+    """16 格建筑配景人物统一色板 (1024x64)：每格 64px 宽，单材质 UV 映射全员服饰与细节。
+    0:  自然肤色(暖)   1:  自然肤色(浅)   2:  乌黑发色       3:  深棕发色
+    4:  白校服上衣     5:  校服浅灰蓝领   6:  藏青校裤/短裤  7:  浅蓝教师衬衫
+    8:  米白教师上衣   9:  深灰西裤       10: 活力蓝球衣     11: 活力红橙球衣
+    12: 白色运动鞋     13: 深灰运动鞋     14: 藏青书包       15: 卡其/酒红书包
     """
     swatches = [
-        (228, 190, 158),  # 0 skin
-        (42, 36, 34),     # 1 dark hair / shoes
-        (242, 244, 246),  # 2 white school uniform
-        (36, 48, 76),     # 3 navy shorts / pants
-        (40, 108, 206),   # 4 blue sports jersey
-        (214, 72, 52),    # 5 red/orange sports jersey
-        (178, 198, 214),  # 6 teacher light blue shirt
-        (68, 72, 78),     # 7 charcoal pants / backpack
+        (228, 188, 156),  # 0 warm skin
+        (238, 204, 176),  # 1 light skin
+        (36, 32, 32),     # 2 black hair
+        (68, 48, 38),     # 3 dark brown hair
+        (242, 245, 248),  # 4 white school uniform shirt
+        (178, 194, 212),  # 5 collar / trim accent
+        (36, 48, 76),     # 6 navy uniform pants / shorts
+        (158, 188, 214),  # 7 teacher light blue shirt
+        (230, 224, 210),  # 8 teacher cream shirt
+        (62, 66, 74),     # 9 charcoal trousers
+        (38, 108, 208),   # 10 blue sports jersey
+        (216, 68, 52),    # 11 red/orange sports jersey
+        (236, 238, 240),  # 12 white sneakers
+        (72, 76, 82),     # 13 dark grey sneakers
+        (46, 60, 92),     # 14 navy backpack
+        (158, 72, 62),    # 15 burgundy/terracotta backpack
     ]
-    W, H = 512, 64
+    W, H = 1024, 64
     sw = W // len(swatches)
     im = Image.new('RGB', (W, H))
     draw = ImageDraw.Draw(im)
@@ -334,9 +233,83 @@ def make_people_palette():
     print('wrote', p)
 
 
+def make_pool_water_normal():
+    """生成 256x256 四方连续无缝水波法线贴图，赋予 50m 室内泳池细腻涟漪与高光反光。"""
+    N = 256
+    u = np.linspace(0, 2 * np.pi, N, endpoint=False)
+    v = np.linspace(0, 2 * np.pi, N, endpoint=False)
+    uu, vv = np.meshgrid(u, v)
+    # 多方向周期正弦波叠加，确保四边严格无缝平铺
+    h = (
+        0.35 * np.sin(3 * uu + 2 * vv)
+        + 0.25 * np.sin(5 * uu - 4 * vv + 1.1)
+        + 0.20 * np.cos(7 * uu + 6 * vv + 2.3)
+        + 0.12 * np.sin(11 * uu - 9 * vv + 0.7)
+        + 0.08 * np.cos(13 * uu + 11 * vv)
+    )
+    dh_du = np.gradient(h, axis=1)
+    dh_dv = np.gradient(h, axis=0)
+    strength = 2.4
+    nx = -dh_du * strength
+    ny = -dh_dv * strength
+    nz = np.ones_like(h)
+    norm = np.sqrt(nx * nx + ny * ny + nz * nz)
+    nx /= norm; ny /= norm; nz /= norm
+    rgb = np.stack([(nx * 0.5 + 0.5), (ny * 0.5 + 0.5), (nz * 0.5 + 0.5)], axis=-1)
+    bgr = (np.clip(rgb[..., ::-1], 0.0, 1.0) * 255).astype(np.uint8)
+    p = os.path.join(OUT, 'pool_water_normal.png')
+    cv2.imwrite(p, bgr)
+    print('wrote', p)
+
+
+
+
+def make_indoor_court_wood():
+    """室内主篮球馆洁净枫木地板底纹 + 蓝三秒区 (1024x1024)，不再烘焙模糊旧白线（由 3D 矢量 Int_Sports_GymLines 承担，彻底消除双圈！）。"""
+    W, H = 1024, 1024
+    # 局部平面映射：x in [-15.0, 2.2] (宽 17.2 m), y in [-16.0, 16.0] (长 32.0 m)
+    rng = np.random.default_rng(77)
+    im = np.zeros((H, W, 3), dtype=np.uint8)
+    # 浅暖枫木长条地板拼花（沿 Y 方向长木条）
+    plank_w = 16
+    plank_h = 96
+    for x in range(0, W, plank_w):
+        offset = int(rng.integers(0, plank_h))
+        for y in range(-offset, H, plank_h):
+            y0, y1 = max(0, y), min(H, y + plank_h)
+            x1 = min(W, x + plank_w)
+            tone = int(rng.integers(-11, 12))
+            # BGR 暖浅枫木色
+            col = np.clip(np.array([154 + tone, 194 + tone, 218 + tone]), 0, 255).astype(np.uint8)
+            im[y0:y1, x:x1] = col
+            if y0 > 0:
+                im[y0:y0 + 1, x:x1] = (128, 164, 186)
+        im[:, x:x + 1] = (132, 168, 190)
+    noise = rng.integers(-4, 5, (H, W, 1), dtype=np.int16)
+    im = np.clip(im.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+    # 主球场中心 x=-6.4 => u = (-6.4 - (-15.0)) / 17.2 = 0.500; 长 28 m 占 28/32 = 0.875
+    def pt(lx, ly):
+        u = (lx - (-15.0)) / 17.2
+        v = (ly - (-16.0)) / 32.0
+        px = int(round(u * W))
+        py = int(round((1.0 - v) * H))
+        return (px, py)
+    # 南北浅蓝三秒区 (宽 4.9 m, 深 5.8 m)
+    key_bgr = (196, 152, 108)
+    for sgn in (1.0, -1.0):
+        bl = sgn * 14.0
+        yft = bl - sgn * 5.8
+        cv2.rectangle(im, pt(-6.4 - 2.45, max(bl, yft)), pt(-6.4 + 2.45, min(bl, yft)), key_bgr, -1)
+    p = os.path.join(OUT, 'indoor_court_wood.png')
+    cv2.imwrite(p, im)
+    print('wrote', p)
+
+
 if __name__ == '__main__':
     make_sports_atlas()
     make_roof_seam()
     make_school_stone()
     make_bleacher_slogan()
     make_people_palette()
+    make_pool_water_normal()
+    make_indoor_court_wood()
